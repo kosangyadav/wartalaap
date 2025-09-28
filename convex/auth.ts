@@ -19,7 +19,15 @@ export const checkUser = action({
     action: v.optional(v.string()),
     password: v.optional(v.string()),
   },
-  handler: async (ctx, { username, password, action }) => {
+  handler: async (
+    ctx,
+    { username, password, action },
+  ): Promise<{
+    success: boolean;
+    message: string;
+    userId?: string;
+    email?: string;
+  }> => {
     // console.log(username);
     const user = await ctx.runQuery(internal.auth.getUser, { username });
     // console.log(user);
