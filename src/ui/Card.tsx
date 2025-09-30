@@ -267,14 +267,14 @@ export const ConversationItem = React.forwardRef<
         {...props}
       >
         <div className="flex items-center gap-3">
-          <div className="relative">
+          {/*<div className="relative">
             <div
               className={cn(
                 "absolute -bottom-1 -right-1",
                 statusClasses[status],
               )}
             />
-          </div>
+          </div>*/}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
@@ -354,7 +354,7 @@ export const CardBody = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   return (
-    <div ref={ref} className={cn("p-6", className)} {...props}>
+    <div ref={ref} className={cn("p-4", className)} {...props}>
       {children}
     </div>
   );

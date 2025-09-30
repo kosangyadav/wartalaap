@@ -16,8 +16,6 @@ export interface SidebarProps {
     conversationName: string,
   ) => void;
   onNewChat: () => void;
-  onSearchChange: (query: string) => void;
-  searchQuery?: string;
   activeConversationId?: string;
   className?: string;
 }
@@ -44,8 +42,6 @@ export interface UserData {
 const Sidebar: React.FC<SidebarProps> = ({
   onSelectConversation,
   onNewChat,
-  onSearchChange,
-  searchQuery = "",
   activeConversationId,
   className,
 }) => {
@@ -66,6 +62,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     ConversationData[]
   >([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Process conversations from Convex
   useEffect(() => {
@@ -143,10 +141,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       setFilteredConversations(filtered);
     }
   }, [conversations, searchQuery]);
-
-  const handleSearch = (query: string) => {
-    onSearchChange(query);
-  };
 
   const handleClearSearch = () => {
     onSearchChange("");
@@ -263,39 +257,17 @@ const Sidebar: React.FC<SidebarProps> = ({
           }
         />
 
-        <CardBody className="flex flex-col h-full p-0">
+        <CardBody className="pb-0 flex flex-col h-full p-0">
           {/* Search */}
-          <div className="p-4 border-b-2 border-terminal-black">
+          <div className="border-b-2 border-terminal-black">
             <SearchInput
               placeholder="Search conversations..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onClear={handleClearSearch}
               disabled={loading}
             />
           </div>
-
-          {/* User Profile Section */}
-          {user && (
-            <div className="p-4 border-b-2 border-terminal-black bg-cream-300">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-mono font-bold text-sm text-terminal-black truncate">
-                    {user.username}
-                  </h3>
-                  <p className="text-xs text-terminal-light-gray truncate">
-                    {user.email}
-                  </p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-2 h-2 rounded-full border border-terminal-black bg-status-online" />
-                    <span className="text-xs font-mono text-terminal-light-gray capitalize">
-                      online
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Conversations List */}
           <div className="flex-1 overflow-y-auto">
@@ -329,12 +301,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                       No results found
                     </h3>
                     <p className="text-sm text-terminal-light-gray">
-                      Try a different search term
+                      Try a different search chat name...
                     </p>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={handleClearSearch}
+                      onClick={() => setSearchQuery("")}
                     >
                       Clear search
                     </Button>
@@ -397,10 +369,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                         ? formatTimestamp(conversation.timestamp)
                         : undefined
                     }
-                    unreadCount={conversation.unreadCount}
+                    // unreadCount={conversation.unreadCount}
                     isActive={conversation.id === activeConversationId}
-                    status={conversation.status}
-                    isTyping={conversation.isTyping}
+                    // status={conversation.status}
+                    // isTyping={conversation.isTyping}
                     onClick={() =>
                       handleSelectConversation(
                         conversation.id,

@@ -67,71 +67,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
       }
     : undefined;
 
-  // Load initial data
-  useEffect(() => {
-    // loadConversations();
-    loadAvailableUsers();
-
-    // TODO: Connect to websocket for real-time updates
-    // const ws = new WebSocket('ws://localhost:3000');
-    // ws.onmessage = handleWebSocketMessage;
-    // return () => ws.disconnect();
-  }, [currentUser.id]);
-
-  // Messages are now handled directly by ChatArea component
-
-  // Conversations are now managed by Sidebar component
-
-  const loadAvailableUsers = async () => {
-    setLoading((prev) => ({ ...prev, users: true }));
-
-    try {
-      // TODO: Replace with actual API call
-      // const response = await api.users.getAll();
-
-      // Mock data for demonstration
-      const mockUsers: UserData[] = [
-        {
-          id: "2",
-          username: "John Doe",
-          email: "john@example.com",
-          status: "online",
-        },
-        {
-          id: "3",
-          username: "Alice Smith",
-          email: "alice@example.com",
-          status: "away",
-        },
-        {
-          id: "4",
-          username: "Bob Wilson",
-          email: "bob@example.com",
-          status: "offline",
-        },
-        {
-          id: "5",
-          username: "Carol Brown",
-          email: "carol@example.com",
-          status: "busy",
-        },
-        {
-          id: "6",
-          username: "David Johnson",
-          email: "david@example.com",
-          status: "online",
-        },
-      ];
-
-      setAvailableUsers(mockUsers);
-    } catch (error) {
-      console.error("Failed to load users:", error);
-      toast.error("Failed to load users");
-    } finally {
-      setLoading((prev) => ({ ...prev, users: false }));
-    }
-  };
-
   const handleSelectConversation = (
     conversationId: string,
     conversationName: string,
@@ -141,56 +76,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
 
     // TODO: Mark conversation as read
     // await api.conversations.markAsRead(conversationId);
-
-    // Messages are now loaded directly by ChatArea component
   };
-
-  const handleCreateChat = async (
-    userIds: string[],
-    isGroup?: boolean,
-    groupName?: string,
-  ) => {
-    setLoading((prev) => ({ ...prev, creatingChat: true }));
-
-    try {
-      // TODO: Replace with actual API call
-      // const response = await api.conversations.create({
-      //   userIds: [...userIds, currentUser.id],
-      //   isGroup,
-      //   name: groupName
-      // });
-
-      // Mock conversation creation
-      const participants = availableUsers.filter((u) => userIds.includes(u.id));
-      const newConversation: ConversationData = {
-        id: `conv-${Date.now()}`,
-        name:
-          isGroup && groupName
-            ? groupName
-            : participants[0]?.username || "New Chat",
-        lastMessage: "",
-        timestamp: new Date().toISOString(),
-        unreadCount: 0,
-        isGroup: isGroup || false,
-        participants: [...participants, currentUser],
-        status: participants[0]?.status || "offline",
-        isTyping: false,
-      };
-
-      setActiveConversationId(newConversation.id);
-      setActiveConversationName(newConversation.name);
-
-      toast.success(`${isGroup ? "Group" : "Chat"} created successfully! 🎉`);
-    } catch (error) {
-      console.error("Failed to create chat:", error);
-      console.error("Failed to create chat");
-      throw error; // Re-throw to let modal handle it
-    } finally {
-      setLoading((prev) => ({ ...prev, creatingChat: false }));
-    }
-  };
-
-  // Search is now handled directly by Sidebar component
 
   const handleNewChat = () => {
     setIsNewChatModalOpen(true);
@@ -244,8 +130,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
           <Sidebar
             onSelectConversation={handleSelectConversation}
             onNewChat={handleNewChat}
-            onSearchChange={() => {}} // Placeholder - Sidebar handles search internally
-            searchQuery=""
             activeConversationId={activeConversationId}
           />
         </div>
@@ -264,10 +148,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
       <NewChatModal
         isOpen={isNewChatModalOpen}
         onClose={() => setIsNewChatModalOpen(false)}
-        onCreateChat={handleCreateChat}
-        users={availableUsers}
-        currentUser={currentUser}
-        loading={loading.creatingChat}
+        setSelectedChat={handleSelectConversation}
       />
 
       {/* Mobile Sidebar Toggle */}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { cn } from '../utils/cn';
+import React, { useState } from "react";
+import { cn } from "../utils/cn";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -266,8 +266,8 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
       <Input
         ref={ref}
         type="search"
-        leftIcon={searchIcon}
-        rightIcon={showClearButton && value && clearIcon}
+        // leftIcon={searchIcon}
+        // rightIcon={showClearButton && value && clearIcon}
         value={value}
         className={cn("input-search", className)}
         {...props}

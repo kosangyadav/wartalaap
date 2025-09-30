@@ -292,16 +292,16 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         {/* Chat Header */}
         <CardHeader
           title={conversation.name}
-          subtitle={
-            conversation.isGroup
-              ? "Group Chat"
-              : conversation.status === "online"
-                ? "Online"
-                : "Last seen recently"
-          }
+          // subtitle={
+          //   conversation.isGroup
+          //     ? "Group Chat"
+          //     : conversation.status === "online"
+          //       ? "Online"
+          //       : "Last seen recently"
+          // }
           action={
             <div className="flex items-center gap-2">
-              <IconButton
+              {/*<IconButton
                 icon={
                   <svg
                     className="w-5 h-5"
@@ -319,8 +319,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 }
                 tooltip="Voice Call"
                 variant="ghost"
-              />
-              <IconButton
+              />*/}
+              {/*<IconButton
                 icon={
                   <svg
                     className="w-5 h-5"
@@ -338,7 +338,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 }
                 tooltip="Video Call"
                 variant="ghost"
-              />
+              />*/}
               <IconButton
                 icon={
                   <svg
@@ -515,7 +515,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             <div className="border-t-2 border-terminal-black p-4 bg-cream-200 flex-shrink-0">
               <div className="relative">
                 {/* Emoji picker */}
-                {showEmojiPicker && (
+                {/*{showEmojiPicker && (
                   <div className="absolute bottom-full left-0 mb-2 bg-cream-100 border-2 border-terminal-black rounded-neu shadow-neu p-3 z-10">
                     <div className="grid grid-cols-4 gap-2">
                       {commonEmojis.map((emoji) => (
@@ -529,17 +529,17 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                       ))}
                     </div>
                   </div>
-                )}
+                )}*/}
 
                 <div className="flex items-end gap-2">
                   {/* Emoji button */}
-                  <IconButton
+                  {/*<IconButton
                     icon={<span className="text-lg">😊</span>}
                     tooltip="Add emoji"
                     variant="ghost"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     className="flex-shrink-0"
-                  />
+                  />*/}
 
                   {/* Message input */}
                   <div className="flex-1 relative">
@@ -592,7 +592,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 {/* File upload and other actions */}
                 <div className="flex items-center justify-between mt-2 text-xs text-terminal-light-gray font-mono">
                   <div className="flex items-center gap-4">
-                    <button className="hover:text-terminal-black transition-colors flex items-center gap-1">
+                    {/*<button className="hover:text-terminal-black transition-colors flex items-center gap-1">
                       <svg
                         className="w-3 h-3"
                         fill="none"
@@ -607,7 +607,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                         />
                       </svg>
                       Attach
-                    </button>
+                    </button>*/}
                   </div>
                   <div>Press Enter to send, Shift+Enter for new line</div>
                 </div>

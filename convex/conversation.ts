@@ -18,6 +18,7 @@ export const getMsgsInConversation = query({
       )
       // .order("desc")
       .take(50);
+    console.log("getMsgsInConversation : ", { messages });
     return messages;
   },
 });
@@ -35,6 +36,7 @@ export const sendMsgToConversation = mutation({
       senderId,
       content,
     });
+    console.log("sendMsgInConversation : ", { newMessage });
     return newMessage;
   },
 });
@@ -42,6 +44,7 @@ export const sendMsgToConversation = mutation({
 export const getConversationWithId = query({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, { conversationId }) => {
+    console.log("getConversationWithId : ", { conversationId });
     return await ctx.db.get(conversationId);
   },
 });
@@ -73,7 +76,7 @@ export const queryUserConversations = query({
       conversations.push(await ctx.db.get(id));
     }
 
-    console.log({ conversations });
+    console.log("queryUserConversations : ", { conversations });
     return conversations;
   },
 });
@@ -89,6 +92,7 @@ export const getUsernameById = action({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     const user = await ctx.runQuery(internal.conversation.getUsers, { userId });
+    console.log("getUsernameById : ", { username: user?.username });
     return user?.username;
   },
 });

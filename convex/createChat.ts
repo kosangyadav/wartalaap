@@ -22,6 +22,7 @@ export const getUsers = query({
 export const getUsersByUsername = action({
   args: { username: v.string() },
   handler: async (ctx, { username }) => {
+    console.log("getUsersByUsername : ", { username });
     return await ctx.runQuery(internal.createChat.getUsers, { username });
   },
 });
@@ -38,7 +39,10 @@ export const checkExisting1on1Conversation = query({
     if (!existingConversations || existingConversations?.length === 0) {
       return null;
     }
-
+    console.log("checkExisting1on1Conversation : ", {
+      pairKey,
+      ConversationId: existingConversations?.[0].ConversationId,
+    });
     // Return the existing conversation ID
     return existingConversations?.[0].conversationId;
   },
@@ -67,7 +71,7 @@ export const create1on1Conversation = mutation({
       pairKey,
     });
 
-    console.log("Created new conversation with ID:", conversation);
+    console.log("Created new 1o1 conversation with ID:", conversation);
 
     // Add both users to the conversation
     await ctx.db.insert("conversation_members", {
@@ -99,7 +103,7 @@ export const createGroupConversation = mutation({
         userId: memberId,
       });
     }
-
+    console.log("createGroupConversation : ", { conversation });
     return conversation;
   },
 });
