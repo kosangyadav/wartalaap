@@ -395,8 +395,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Footer Actions */}
           <div className="p-4 border-t-2 border-terminal-black bg-cream-300">
-            <div className="flex items-center gap-2">
-              <IconButton
+            <div className="flex items-center justify-between gap-2">
+              {/*<IconButton
                 icon={
                   <svg
                     className="w-5 h-5"
@@ -421,7 +421,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 tooltip="Settings"
                 variant="ghost"
                 className="flex-1"
-              />
+              />*/}
+              <div></div>
               <IconButton
                 icon={
                   <svg
@@ -440,7 +441,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }
                 tooltip="Logout"
                 variant="ghost"
-                className="flex-1"
+                className=""
                 onClick={handleLogout}
               />
             </div>

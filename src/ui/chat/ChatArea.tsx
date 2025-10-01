@@ -511,7 +511,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             </div>
 
             {/* Message Input */}
-            <div className="bg-cream-200 flex p-4 gap-4 justify-between items-center">
+            <div className="bg-cream-200 flex p-4 gap-4">
               {/*border-t-2 border-terminal-black*/}
               {/* Message input */}
               {/*<div className="flex-1">*/}
