@@ -14,6 +14,7 @@ export interface SidebarProps {
   onSelectConversation: (
     conversationId: string,
     conversationName: string,
+    isGroup: boolean,
   ) => void;
   onNewChat: () => void;
   activeConversationId?: string;
@@ -149,8 +150,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleSelectConversation = (
     conversationId: string,
     conversationName: string,
+    isGroup: boolean,
   ) => {
-    onSelectConversation(conversationId, conversationName);
+    onSelectConversation(conversationId, conversationName, isGroup);
   };
 
   const handleLogout = async () => {
@@ -259,7 +261,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <CardBody className="pb-0 flex flex-col h-full p-0">
           {/* Search */}
-          <div className="border-b-2 border-terminal-black">
+          <div className="pt-4 px-2">
             <SearchInput
               placeholder="Search conversations..."
               value={searchQuery}
@@ -377,6 +379,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       handleSelectConversation(
                         conversation.id,
                         conversation.name,
+                        conversation.isGroup,
                       )
                     }
                     className={cn(

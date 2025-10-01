@@ -8,17 +8,8 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  (
-    { className, variant = "default", padding = "md", children, ...props },
-    ref,
-  ) => {
+  ({ className, padding = "md", children, ...props }, ref) => {
     const baseClasses = "card-neu";
-
-    const variantClasses = {
-      default: "",
-      interactive: "card-neu-interactive",
-      elevated: "shadow-neu-lg hover:shadow-neu-xl",
-    };
 
     const paddingClasses = {
       none: "p-0",
@@ -27,12 +18,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       lg: "p-8",
     };
 
-    const classes = cn(
-      baseClasses,
-      variantClasses[variant],
-      paddingClasses[padding],
-      className,
-    );
+    const classes = cn(baseClasses, paddingClasses[padding], className);
 
     return (
       <div ref={ref} className={classes} {...props}>
@@ -170,7 +156,7 @@ export const MessageBubble = React.forwardRef<
         >
           <p className="font-mono text-sm">{message}</p>
           {timestamp && (
-            <p className="text-xs text-terminal-light-gray mt-1">{timestamp}</p>
+            <p className="text-xs text-terminal-light-gray mt-0">{timestamp}</p>
           )}
         </div>
       );
@@ -180,7 +166,7 @@ export const MessageBubble = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "flex items-start gap-3 mb-4",
+          "flex items-start",
           type === "sent" ? "flex-row-reverse" : "flex-row",
         )}
         {...props}
@@ -191,7 +177,7 @@ export const MessageBubble = React.forwardRef<
 
         <div className={cn(bubbleClasses[type], className)}>
           {type === "received" && username && (
-            <p className="font-mono font-bold text-sm text-terminal-black mb-1">
+            <p className="font-mono font-bold text-sm text-terminal-black">
               {username}
             </p>
           )}
@@ -200,16 +186,11 @@ export const MessageBubble = React.forwardRef<
 
           <div
             className={cn(
-              "flex items-center justify-between mt-2 text-xs text-terminal-light-gray",
+              "flex items-center justify-between mt-1 text-[0.69rem] text-terminal-light-gray",
               type === "sent" ? "flex-row-reverse" : "flex-row",
             )}
           >
             <span>{timestamp}</span>
-            {type === "sent" && status && (
-              <span className="flex items-center gap-1">
-                {statusIcons[status]}
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -243,7 +224,6 @@ export const ConversationItem = React.forwardRef<
       timestamp,
       unreadCount,
       isActive = false,
-      status = "offline",
       isTyping = false,
       ...props
     },
@@ -252,13 +232,6 @@ export const ConversationItem = React.forwardRef<
     const baseClasses = isActive
       ? "conversation-item-active"
       : "conversation-item";
-
-    const statusClasses = {
-      online: "status-online",
-      away: "status-away",
-      busy: "status-busy",
-      offline: "status-offline",
-    };
 
     return (
       <div
@@ -327,7 +300,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-center justify-between p-6 border-b-2 border-terminal-black",
+          "flex items-center justify-between px-4 py-3 border-b-2 border-terminal-black",
           className,
         )}
         {...props}
@@ -354,7 +327,7 @@ export const CardBody = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   return (
-    <div ref={ref} className={cn("p-4", className)} {...props}>
+    <div ref={ref} className={cn("p-0", className)} {...props}>
       {children}
     </div>
   );

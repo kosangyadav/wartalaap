@@ -203,7 +203,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
         {error && <div className="form-error">{error}</div>}
         {helperText && !error && (
-          <div className="text-xs text-terminal-light-gray mt-1 font-mono">
+          <div className="text-xs text-terminal-light-gray font-mono">
             {helperText}
           </div>
         )}

@@ -45,14 +45,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
   const [activeConversationId, setActiveConversationId] = useState<string>();
   const [activeConversationName, setActiveConversationName] =
     useState<string>();
-
-  const [availableUsers, setAvailableUsers] = useState<UserData[]>([]);
+  const [activeConversationType, setActiveConversationType] =
+    useState<boolean>();
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
-  const [loading, setLoading] = useState({
-    conversations: false,
-    users: false,
-    creatingChat: false,
-  });
 
   // UI Store
   const { isSidebarOpen } = useUIStore();
@@ -62,7 +57,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
     ? {
         id: activeConversationId,
         name: activeConversationName || "Unknown",
-        isGroup: false,
+        isGroup: activeConversationType,
         status: "online" as const,
       }
     : undefined;
@@ -70,9 +65,11 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
   const handleSelectConversation = (
     conversationId: string,
     conversationName: string,
+    isGroup: boolean,
   ) => {
     setActiveConversationId(conversationId);
     setActiveConversationName(conversationName);
+    setActiveConversationType(isGroup);
 
     // TODO: Mark conversation as read
     // await api.conversations.markAsRead(conversationId);

@@ -453,7 +453,7 @@ body {
   font-size: 0.875rem;
   background-color: var(--color-cream-100);
   border: 2px solid var(--color-terminal-black);
-  border-radius: 12px;
+  border-radius: 30px;
   box-shadow: var(--shadow-neu-inset);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
@@ -475,7 +475,7 @@ body {
 }
 
 .textarea-neu {
-  min-height: 120px;
+  /*min-height: 120px;*/
   resize: vertical;
 }
 
@@ -485,7 +485,7 @@ body {
   border: 2px solid var(--color-terminal-black);
   border-radius: 16px;
   box-shadow: var(--shadow-neu);
-  padding: 1.5rem;
+  /*padding: 0 1rem;*/
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -511,8 +511,7 @@ body {
   box-shadow: var(--shadow-neu);
   margin-left: auto;
   max-width: 24rem;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem;
 }
 
 .message-received {
@@ -522,8 +521,7 @@ body {
   box-shadow: var(--shadow-neu);
   margin-right: auto;
   max-width: 24rem;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem;
 }
 
 .message-system {

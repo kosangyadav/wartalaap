@@ -21,7 +21,7 @@ export interface ConversationData {
   isGroup?: boolean;
   participants?: UserData[];
   description?: string;
-  status?: "online" | "away" | "busy" | "offline";
+  // status?: "online" | "away" | "busy" | "offline";
 }
 
 export interface MessageData {
@@ -53,7 +53,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   const { user } = useAuthStore();
   const [messageInput, setMessageInput] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -174,12 +173,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     }
   };
 
-  const handleEmojiClick = (emoji: string) => {
-    setMessageInput((prev) => prev + emoji);
-    setShowEmojiPicker(false);
-    inputRef.current?.focus();
-  };
-
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -237,7 +230,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       return groups;
     }, {}) || {};
 
-  const commonEmojis = ["😊", "😂", "❤️", "👍", "👎", "😮", "😢", "😡"];
+  console.log({ conversation });
+  // const commonEmojis = ["😊", "😂", "❤️", "👍", "👎", "😮", "😢", "😡"];
 
   if (!conversation) {
     return (
@@ -284,7 +278,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col h-full max-h-full overflow-hidden",
+        "flex flex-col h-full max-h-full overflow-hidden p-0",
         className,
       )}
     >
@@ -367,7 +361,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           <div className="flex flex-col h-full max-h-full">
             <div
               ref={messagesContainerRef}
-              className="flex-1 overflow-y-auto p-4 space-y-4 messages-scroll-container min-h-0"
+              className="flex-1 overflow-y-auto p-1 space-y-4 messages-scroll-container min-h-0"
               onScroll={handleScroll}
             >
               {!messages?.length ? (
@@ -399,9 +393,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               ) : (
                 Object.entries(groupedMessages).map(
                   ([dateKey, dateMessages]) => (
-                    <div key={dateKey} className="space-y-4">
+                    <div key={dateKey} className="px-4">
                       {/* Date separator */}
-                      <div className="flex items-center justify-center py-2">
+                      <div className="flex items-center justify-center p-2">
                         <div className="bg-cream-300 border-2 border-terminal-black rounded-full px-4 py-1 shadow-neu">
                           <span className="text-xs font-mono font-bold text-terminal-black">
                             {dateKey}
@@ -414,32 +408,37 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                         const isOwnMessage = message.senderId === user?.id;
                         const prevMessage = dateMessages[index - 1];
                         const showAvatar =
-                          !prevMessage ||
-                          prevMessage.senderId !== message.senderId;
+                          !isOwnMessage &&
+                          (!prevMessage ||
+                            prevMessage.senderId !== message.senderId);
 
                         return (
                           <div
                             key={message._id}
                             className={cn(
-                              "flex gap-3 group",
+                              "flex gap-2 group",
                               isOwnMessage ? "flex-row-reverse" : "flex-row",
+                              prevMessage?.senderId !== message.senderId
+                                ? "mt-4"
+                                : "mt-2",
                             )}
                           >
                             {/* Avatar */}
-                            <div
-                              className={cn(
-                                "flex-shrink-0",
-                                showAvatar ? "opacity-100" : "opacity-0",
-                              )}
-                            >
-                              <div className="w-8 h-8 rounded-full bg-accent-blue border-2 border-terminal-black shadow-neu flex items-center justify-center">
-                                <span className="text-xs font-mono font-bold text-white">
-                                  {isOwnMessage
-                                    ? currentUser.username[0]?.toUpperCase()
-                                    : "U"}
-                                </span>
+                            {!isOwnMessage && conversation.isGroup && (
+                              <div
+                                className={cn(
+                                  "flex-shrink-0",
+                                  showAvatar ? "opacity-100" : "opacity-0",
+                                )}
+                              >
+                                <div className="w-8 h-8 rounded-full bg-accent-blue border-2 border-terminal-black shadow-neu flex items-center justify-center">
+                                  <span className="text-xs font-mono font-bold">
+                                    {!isOwnMessage &&
+                                      currentUser.username[0]?.toUpperCase()}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
+                            )}
 
                             {/* Message */}
                             <div
@@ -512,106 +511,54 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             </div>
 
             {/* Message Input */}
-            <div className="border-t-2 border-terminal-black p-4 bg-cream-200 flex-shrink-0">
-              <div className="relative">
-                {/* Emoji picker */}
-                {/*{showEmojiPicker && (
-                  <div className="absolute bottom-full left-0 mb-2 bg-cream-100 border-2 border-terminal-black rounded-neu shadow-neu p-3 z-10">
-                    <div className="grid grid-cols-4 gap-2">
-                      {commonEmojis.map((emoji) => (
-                        <button
-                          key={emoji}
-                          onClick={() => handleEmojiClick(emoji)}
-                          className="p-2 hover:bg-cream-300 rounded-neu text-xl transition-colors"
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}*/}
-
-                <div className="flex items-end gap-2">
-                  {/* Emoji button */}
-                  {/*<IconButton
-                    icon={<span className="text-lg">😊</span>}
-                    tooltip="Add emoji"
-                    variant="ghost"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="flex-shrink-0"
-                  />*/}
-
-                  {/* Message input */}
-                  <div className="flex-1 relative">
-                    <Textarea
-                      ref={inputRef}
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      onFocus={() => setIsInputFocused(true)}
-                      onBlur={() => setIsInputFocused(false)}
-                      placeholder="Type a message..."
-                      className={cn(
-                        "min-h-[44px] max-h-32 resize-none",
-                        isInputFocused && "ring-2 ring-accent-blue",
-                      )}
-                      disabled={isSending}
-                    />
-                  </div>
-
-                  {/* Send button */}
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={handleSendMessage}
-                    disabled={!messageInput.trim() || isSending}
-                    loading={isSending}
-                    className="flex-shrink-0"
-                    leftIcon={
-                      !isSending ? (
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                          />
-                        </svg>
-                      ) : undefined
-                    }
-                  >
-                    {isSending ? "Sending..." : "Send"}
-                  </Button>
-                </div>
-
-                {/* File upload and other actions */}
-                <div className="flex items-center justify-between mt-2 text-xs text-terminal-light-gray font-mono">
-                  <div className="flex items-center gap-4">
-                    {/*<button className="hover:text-terminal-black transition-colors flex items-center gap-1">
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                        />
-                      </svg>
-                      Attach
-                    </button>*/}
-                  </div>
-                  <div>Press Enter to send, Shift+Enter for new line</div>
-                </div>
-              </div>
+            <div className="bg-cream-200 flex p-4 gap-4 justify-between items-center">
+              {/*border-t-2 border-terminal-black*/}
+              {/* Message input */}
+              {/*<div className="flex-1">*/}
+              <Textarea
+                ref={inputRef}
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                placeholder="Type a message..."
+                className={cn(
+                  "border-1 border-terminal-black rounded-4xl pl-4 h-fit max-h-30 resize-none",
+                  // "min-h-[44px] max-h-32 resize-none",
+                  isInputFocused && "ring-2 ring-accent-blue",
+                )}
+                disabled={isSending}
+              />
+              {/*</div>*/}
+              {/* Send button */}
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSendMessage}
+                disabled={!messageInput.trim() || isSending}
+                loading={isSending}
+                className="flex-shrink-0 p-2"
+                // leftIcon={
+                //   !isSending ? (
+                //     <svg
+                //       className="w-4 h-4"
+                //       fill="none"
+                //       stroke="currentColor"
+                //       viewBox="0 0 24 24"
+                //     >
+                //       <path
+                //         strokeLinecap="round"
+                //         strokeLinejoin="round"
+                //         strokeWidth={2}
+                //         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                //       />
+                //     </svg>
+                //   ) : undefined
+                // }
+              >
+                {isSending ? "Sending..." : "Send"}
+              </Button>
             </div>
           </div>
         </CardBody>
