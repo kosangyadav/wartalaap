@@ -173,7 +173,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref,
   ) => {
-    const baseClasses = "textarea-neu focus-ring";
+    const baseClasses = "textarea-neu"; //"textarea-neu focus-ring";
     const errorClasses = error ? "border-accent-red ring-accent-red" : "";
     const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "";
     const resizeClasses = {
@@ -193,7 +193,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     );
 
     return (
-      <div className={cn("form-group", fullWidth && "w-full")}>
+      <div className={cn("flex items-center", fullWidth && "w-full")}>
+        {/*form-group */}
         {label && <label className="form-label">{label}</label>}
         <textarea
           className={classes}
