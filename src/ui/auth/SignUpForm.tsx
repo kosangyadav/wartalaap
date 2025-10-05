@@ -22,7 +22,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   onSubmit,
   onSignIn,
   loading = false,
-  error,
   className,
 }) => {
   const [formData, setFormData] = useState({

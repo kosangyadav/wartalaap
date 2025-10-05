@@ -11,6 +11,7 @@ import {
   ProtectedRoute,
 } from "./components/routes/protectedAndAuthRoute.tsx";
 import NotFoundPage from "./components/routes/NotFound.tsx";
+import RootRedirect from "./components/routes/RootRedirect.tsx";
 
 import ToasterConfig from "./utils/toast.tsx";
 
@@ -21,6 +22,7 @@ createRoot(document.getElementById("root")!).render(
   <ConvexProvider client={convex}>
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<RootRedirect />} />
         <Route
           path="/login"
           element={
