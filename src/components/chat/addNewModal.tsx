@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAction, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useEffect, useState } from "react";
@@ -8,7 +9,11 @@ import type { Id } from "../../../convex/_generated/dataModel";
 //   createGroupConversation,
 // } from "../../../convex/chat";
 
-const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
+const AddNewModal = ({
+  className,
+  toggleCreateChatModal,
+  setSelectedChat,
+}: any) => {
   const [searchName, setSearchName] = useState("");
   const [unselectedUsersList, setUnselectedUsersList] = useState(
     Array<{ _id?: string; username: string }>,
@@ -23,20 +28,20 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
 
   const { user } = useAuthStore();
 
-  const listUsersAction = useAction(api.createChat?.getUsersByUsername);
+  const listUsersAction = useAction((api.createChat as any).getUsersByUsername);
 
   const create1on1Conversation = useMutation(
-    api.createChat?.create1on1Conversation,
+    (api.createChat as any).create1on1Conversation,
   );
   const createGroupConversation = useMutation(
     api.createChat.createGroupConversation,
   );
 
-  const fetchUsers = async (e) => {
+  const fetchUsers = async (e: any) => {
     e.preventDefault();
     const usernameList = await listUsersAction({ username: searchName });
     setUnselectedUsersList(
-      usernameList.filter((users) => users.username !== user?.username),
+      usernameList.filter((users: any) => users.username !== user?.username),
     );
 
     setFilterList(filterList);
