@@ -4,11 +4,7 @@ import ChatArea from "./chat/ChatArea";
 import NewChatModal from "./chat/NewChatModal";
 import { cn } from "../utils/cn";
 import { useUIStore } from "../../stores/uiStore";
-
-export interface ChatAppProps {
-  currentUser: UserData;
-  className?: string;
-}
+import { useAuthStore } from "../../stores/authStore";
 
 export interface UserData {
   id: string;
@@ -29,18 +25,14 @@ export interface ConversationData {
   isTyping?: boolean;
 }
 
-export interface MessageData {
-  id: string;
-  content: string;
-  senderId: string;
-  timestamp: string;
-  type?: "text" | "image" | "file" | "system";
-  status?: "sending" | "sent" | "delivered" | "read" | "failed";
-  replyTo?: string;
+export interface ChatAppProps {
+  className?: string;
 }
 
-const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
-  // State management
+const ChatApp: React.FC<ChatAppProps> = ({ className }) => {
+  const { user } = useAuthStore();
+  const { setIsMobile, isMobile } = useUIStore();
+
   const [activeConversationId, setActiveConversationId] = useState<string>();
   const [activeConversationName, setActiveConversationName] =
     useState<string>();
@@ -49,10 +41,13 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"sidebar" | "chat">("sidebar");
 
-  // UI Store
-  const { setIsMobile, isMobile } = useUIStore();
+  const currentUser: UserData = {
+    id: user?.id || "current-user",
+    username: user?.username || "Demo User",
+    email: user?.email || "demo@wartalaap.com",
+    status: "online",
+  };
 
-  // Handle window resize for mobile detection
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < 1024;
@@ -64,7 +59,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, [setIsMobile]);
 
-  // Get active conversation data
   const activeConversation = activeConversationId
     ? {
         id: activeConversationId,
@@ -107,7 +101,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
       )}
     >
       <div className="grid-chat overflow-hidden">
-        {/* Sidebar */}
         <div
           className={cn(
             "sidebar-area min-h-0",
@@ -122,7 +115,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
           />
         </div>
 
-        {/* Chat Area */}
         <div
           className={cn(
             "chat-main-area min-h-0 w-full",
@@ -140,7 +132,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
         </div>
       </div>
 
-      {/* New Chat Modal */}
       <NewChatModal
         isOpen={isNewChatModalOpen}
         onClose={() => setIsNewChatModalOpen(false)}
@@ -151,60 +142,3 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
 };
 
 export default ChatApp;
-
-// TODO: Integration checklist
-// 1. WebSocket Integration:
-//    - Initialize websocket connection on component mount
-//    - Handle real-time message updates
-//    - Implement typing indicators
-//    - Handle user status updates
-//    - Manage connection state and reconnection logic
-
-// 2. API Integration:
-//    - Replace mock data with actual API calls
-//    - Implement conversation loading and pagination
-//    - Add message loading with pagination
-//    - Implement user search and filtering
-//    - Add conversation management (create, delete, archive)
-
-// 3. Authentication Integration:
-//    - Connect to authentication store
-//    - Handle user sessions and token refresh
-//    - Implement logout functionality
-//    - Add user profile management
-
-// 4. Performance Optimizations:
-//    - Implement virtual scrolling for large message lists
-//    - Add message caching and offline support
-//    - Optimize re-renders with useMemo and useCallback
-//    - Implement lazy loading for conversations
-
-// 5. Enhanced Features:
-//    - File upload and sharing
-//    - Message reactions and replies
-//    - Message search functionality
-//    - Push notifications
-//    - Message encryption
-//    - Voice and video calling integration
-//    - Message threading
-//    - Custom emoji and stickers
-//    - Message formatting (markdown support)
-//    - Group management (add/remove users, roles)
-
-// 6. Error Handling:
-//    - Implement comprehensive error boundaries
-//    - Add retry mechanisms for failed operations
-//    - Handle network connectivity issues
-//    - Add user-friendly error messages
-
-// 7. Accessibility:
-//    - Add proper ARIA labels and roles
-//    - Implement keyboard navigation
-//    - Ensure screen reader compatibility
-//    - Add focus management
-
-// 8. Testing:
-//    - Add unit tests for components
-//    - Implement integration tests
-//    - Add E2E tests for critical user flows
-//    - Performance testing and monitoring

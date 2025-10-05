@@ -28,11 +28,39 @@ export interface ConversationData {
   isGroup?: boolean;
 }
 
-const LoadingSkeleton: React.FC = () => (
-  <div className="p-4 space-y-3">
-    {Array.from({ length: 5 }).map((_, index) => (
-      <div key={index} className="loading-skeleton h-16 rounded-neu" />
-    ))}
+const SimpleLoader: React.FC = () => (
+  <div className="flex flex-col items-center justify-center py-12">
+    <svg
+      className="w-8 h-8 text-green-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeDasharray="31.416"
+        strokeDashoffset="31.416"
+        fill="none"
+        strokeLinecap="round"
+      >
+        <animateTransform
+          attributeName="transform"
+          attributeType="XML"
+          type="rotate"
+          from="0 12 12"
+          to="360 12 12"
+          dur="1s"
+          repeatCount="indefinite"
+        />
+      </circle>
+    </svg>
+    <p className="text-sm text-terminal-light-gray font-mono mt-4">
+      Loading conversations...
+    </p>
   </div>
 );
 
@@ -215,23 +243,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const [conversations, setConversations] = useState<ConversationData[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
 
   const userConversations = useQuery(
     api.conversation.queryUserConversations,
     user?.id ? { userId: user.id as Id<"users"> } : "skip",
   );
+
+  const isLoading = userConversations === undefined;
   // @ts-expect-error - API function exists but may not be in generated types
   const getUsernameById = useAction(api.conversation.getUsernameById);
 
   useEffect(() => {
     const processConversations = async () => {
       if (!userConversations || !user?.id) {
-        setLoading(false);
         return;
       }
-
-      setLoading(true);
 
       try {
         const processed = await Promise.all(
@@ -285,8 +311,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       } catch (error) {
         console.error("Failed to process conversations:", error);
         setConversations([]);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -350,7 +374,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               tooltip="New Chat"
               onClick={onNewChat}
               variant="ghost"
-              disabled={loading}
+              disabled={isLoading}
               className="h-9 w-9"
             />
           </div>
@@ -364,7 +388,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onClear={handleClearSearch}
-            disabled={loading}
+            disabled={isLoading}
             className="h-11 text-base lg:h-auto lg:text-sm"
             onKeyDown={(e) => {
               if (e.key === "Enter" && filteredConversations.length > 0) {
@@ -381,8 +405,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <LoadingSkeleton />
+          {isLoading ? (
+            <SimpleLoader />
           ) : filteredConversations.length === 0 ? (
             <EmptyState
               isSearching={!!searchQuery}

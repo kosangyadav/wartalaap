@@ -2,7 +2,7 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router";
-import Chat from "./Chat.tsx";
+import ChatApp from "./ui/ChatApp.tsx";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import SignUp from "./components/auth/SignUp.tsx";
 import SignIn from "./components/auth/SignIn.tsx";
@@ -40,7 +40,7 @@ createRoot(document.getElementById("root")!).render(
           path="/chat"
           element={
             <ProtectedRoute>
-              <Chat />
+              <ChatApp />
             </ProtectedRoute>
           }
         />

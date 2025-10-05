@@ -18,14 +18,6 @@ export interface SignUpFormProps {
   className?: string;
 }
 
-export interface SignUpFormData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  acceptTerms: boolean;
-}
-
 const SignUpForm: React.FC<SignUpFormProps> = ({
   onSubmit,
   onSignIn,
@@ -33,7 +25,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   error,
   className,
 }) => {
-  const [formData, setFormData] = useState<SignUpFormData>({
+  const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
@@ -41,153 +33,59 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
     acceptTerms: false,
   });
 
-  const [validationErrors, setValidationErrors] = useState<
-    Partial<Record<keyof SignUpFormData, string>>
-  >({});
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof SignUpFormData, boolean>>
-  >({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateUsername = (username: string): string | undefined => {
-    if (!username.trim()) {
-      return "Username is required";
+  const validate = (field: string, value: string | boolean) => {
+    let error = "";
+
+    switch (field) {
+      case "username":
+        if (!value || (value as string).length < 3) {
+          error = "Username must be at least 3 characters";
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value as string)) {
+          error = "Username can only contain letters, numbers, and underscores";
+        }
+        break;
+      case "email":
+        if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value as string)) {
+          error = "Please enter a valid email address";
+        }
+        break;
+      case "password":
+        if (!value || (value as string).length < 4) {
+          error = "Password must be at least 4 characters";
+        }
+        break;
+      case "confirmPassword":
+        if (value !== formData.password) {
+          error = "Passwords do not match";
+        }
+        break;
+      case "acceptTerms":
+        if (!value) {
+          error = "You must accept the terms and conditions";
+        }
+        break;
     }
-    if (username.length < 3) {
-      return "Username must be at least 3 characters";
-    }
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      return "Username can only contain letters, numbers, and underscores";
-    }
-    return undefined;
+
+    setErrors((prev) => ({ ...prev, [field]: error }));
+    return !error;
   };
 
-  const validateEmail = (email: string): string | undefined => {
-    if (!email.trim()) {
-      return "Email is required";
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Please enter a valid email address";
-    }
-    return undefined;
-  };
-
-  const validatePassword = (password: string): string | undefined => {
-    if (!password) {
-      return "Password is required";
-    }
-    if (password.length < 4) {
-      return "Password must be at least 4 characters";
-    }
-    // if (!/(?=.*[a-z])(?=.*[A-Z])/.test(password)) {
-    //   return "Password must contain at least one uppercase and lowercase letter";
-    // }
-    return undefined;
-  };
-
-  const validateConfirmPassword = (
-    confirmPassword: string,
-    password: string,
-  ): string | undefined => {
-    if (!confirmPassword) {
-      return "Please confirm your password";
-    }
-    if (confirmPassword !== password) {
-      return "Passwords do not match";
-    }
-    return undefined;
-  };
-
-  const validateTerms = (acceptTerms: boolean): string | undefined => {
-    if (!acceptTerms) {
-      return "You must accept the terms and conditions";
-    }
-    return undefined;
-  };
-
-  const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof SignUpFormData, string>> = {};
-
-    const usernameError = validateUsername(formData.username);
-    if (usernameError) errors.username = usernameError;
-
-    const emailError = validateEmail(formData.email);
-    if (emailError) errors.email = emailError;
-
-    const passwordError = validatePassword(formData.password);
-    if (passwordError) errors.password = passwordError;
-
-    const confirmPasswordError = validateConfirmPassword(
-      formData.confirmPassword,
-      formData.password,
-    );
-    if (confirmPasswordError) errors.confirmPassword = confirmPasswordError;
-
-    const termsError = validateTerms(formData.acceptTerms);
-    if (termsError) errors.acceptTerms = termsError;
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleInputChange = (
-    field: keyof SignUpFormData,
-    value: string | boolean,
-  ) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-
-    // Clear validation error when user starts typing
-    if (validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const handleInputBlur = (field: keyof SignUpFormData) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-
-    // Validate field on blur
-    let error: string | undefined;
-    if (field === "username") {
-      error = validateUsername(formData.username);
-    } else if (field === "email") {
-      error = validateEmail(formData.email);
-    } else if (field === "password") {
-      error = validatePassword(formData.password);
-    } else if (field === "confirmPassword") {
-      error = validateConfirmPassword(
-        formData.confirmPassword,
-        formData.password,
-      );
-    } else if (field === "acceptTerms") {
-      error = validateTerms(formData.acceptTerms);
-    }
-
-    if (error) {
-      setValidationErrors((prev) => ({ ...prev, [field]: error }));
-    }
+    validate(field, value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields as touched
-    setTouched({
-      username: true,
-      email: true,
-      password: true,
-      confirmPassword: true,
-      acceptTerms: true,
-    });
+    const isValid = Object.keys(formData).every((field) =>
+      validate(field, formData[field as keyof typeof formData]),
+    );
 
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
+    if (isValid && !Object.values(errors).some(Boolean)) {
       await onSubmit(formData);
-    } catch (err) {
-      // Error handling is managed by parent component
-      console.error("Sign up failed:", err);
     }
   };
 
@@ -204,7 +102,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             <div className="toast-error p-3 text-sm">
               <div className="flex items-center gap-2">
                 <svg
-                  className="w-4 h-4 flex-shrink-0"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -226,25 +124,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             label="Username"
             placeholder="Choose a username"
             value={formData.username}
-            onChange={(e) => handleInputChange("username", e.target.value)}
-            onBlur={() => handleInputBlur("username")}
-            error={touched.username ? validationErrors.username : undefined}
+            onChange={(e) => handleChange("username", e.target.value)}
+            error={errors.username}
             disabled={loading}
-            // leftIcon={
-            //   <svg
-            //     className="w-4 h-4"
-            //     fill="none"
-            //     stroke="currentColor"
-            //     viewBox="0 0 24 24"
-            //   >
-            //     <path
-            //       strokeLinecap="round"
-            //       strokeLinejoin="round"
-            //       strokeWidth={2}
-            //       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            //     />
-            //   </svg>
-            // }
             autoComplete="username"
             required
           />
@@ -254,25 +136,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             label="Email Address"
             placeholder="Enter your email"
             value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            onBlur={() => handleInputBlur("email")}
-            error={touched.email ? validationErrors.email : undefined}
+            onChange={(e) => handleChange("email", e.target.value)}
+            error={errors.email}
             disabled={loading}
-            // leftIcon={
-            //   <svg
-            //     className="w-4 h-4"
-            //     fill="none"
-            //     stroke="currentColor"
-            //     viewBox="0 0 24 24"
-            //   >
-            //     <path
-            //       strokeLinecap="round"
-            //       strokeLinejoin="round"
-            //       strokeWidth={2}
-            //       d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-            //     />
-            //   </svg>
-            // }
             autoComplete="email"
             required
           />
@@ -281,25 +147,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             label="Password"
             placeholder="Create a password"
             value={formData.password}
-            onChange={(e) => handleInputChange("password", e.target.value)}
-            onBlur={() => handleInputBlur("password")}
-            error={touched.password ? validationErrors.password : undefined}
+            onChange={(e) => handleChange("password", e.target.value)}
+            error={errors.password}
             disabled={loading}
-            // leftIcon={
-            //   <svg
-            //     className="w-4 h-4"
-            //     fill="none"
-            //     stroke="currentColor"
-            //     viewBox="0 0 24 24"
-            //   >
-            //     <path
-            //       strokeLinecap="round"
-            //       strokeLinejoin="round"
-            //       strokeWidth={2}
-            //       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-            //     />
-            //   </svg>
-            // }
             autoComplete="new-password"
             required
           />
@@ -308,31 +158,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             label="Confirm Password"
             placeholder="Confirm your password"
             value={formData.confirmPassword}
-            onChange={(e) =>
-              handleInputChange("confirmPassword", e.target.value)
-            }
-            onBlur={() => handleInputBlur("confirmPassword")}
-            error={
-              touched.confirmPassword
-                ? validationErrors.confirmPassword
-                : undefined
-            }
+            onChange={(e) => handleChange("confirmPassword", e.target.value)}
+            error={errors.confirmPassword}
             disabled={loading}
-            // leftIcon={
-            //   <svg
-            //     className="w-4 h-4"
-            //     fill="none"
-            //     stroke="currentColor"
-            //     viewBox="0 0 24 24"
-            //   >
-            //     <path
-            //       strokeLinecap="round"
-            //       strokeLinejoin="round"
-            //       strokeWidth={2}
-            //       d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            //     />
-            //   </svg>
-            // }
             autoComplete="new-password"
             required
           />
@@ -342,10 +170,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
               <input
                 type="checkbox"
                 checked={formData.acceptTerms}
-                onChange={(e) =>
-                  handleInputChange("acceptTerms", e.target.checked)
-                }
-                onBlur={() => handleInputBlur("acceptTerms")}
+                onChange={(e) => handleChange("acceptTerms", e.target.checked)}
                 className="w-4 h-4 mt-0.5 border-2 border-terminal-black rounded focus:ring-2 focus:ring-accent-green"
                 disabled={loading}
               />
@@ -353,22 +178,22 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
                 I agree to the{" "}
                 <button
                   type="button"
-                  className="text-accent-blue hover:text-accent-blue-hover underline focus:outline-none focus:ring-2 focus:ring-accent-blue rounded"
+                  className="text-accent-blue hover:text-accent-blue-hover underline"
                 >
                   Terms of Service
                 </button>{" "}
                 and{" "}
                 <button
                   type="button"
-                  className="text-accent-blue hover:text-accent-blue-hover underline focus:outline-none focus:ring-2 focus:ring-accent-blue rounded"
+                  className="text-accent-blue hover:text-accent-blue-hover underline"
                 >
                   Privacy Policy
                 </button>
               </span>
             </label>
-            {touched.acceptTerms && validationErrors.acceptTerms && (
-              <div className="text-xs text-accent-red font-mono mt-1">
-                {validationErrors.acceptTerms}
+            {errors.acceptTerms && (
+              <div className="text-xs text-accent-red font-mono">
+                {errors.acceptTerms}
               </div>
             )}
           </div>
@@ -392,7 +217,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
               <button
                 type="button"
                 onClick={onSignIn}
-                className="text-sm font-mono font-bold text-accent-green hover:text-accent-green-hover underline focus:outline-none focus:ring-2 focus:ring-accent-green rounded"
+                className="text-sm font-mono font-bold text-accent-green hover:text-accent-green-hover underline"
                 disabled={loading}
               >
                 Sign In
