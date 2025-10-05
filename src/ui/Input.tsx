@@ -223,7 +223,7 @@ export interface SearchInputProps
 }
 
 export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ onClear, showClearButton = true, value, className, ...props }, ref) => {
+  ({ value, className, ...props }, ref) => {
     // const searchIcon = (
     //   <svg
     //     className="w-5 h-5"

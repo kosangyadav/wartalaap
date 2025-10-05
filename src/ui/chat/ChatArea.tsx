@@ -327,7 +327,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 </div>
               ) : (
                 Object.entries(groupedMessages).map(
-                  ([dateKey, dateMessages]) => (
+                  ([dateKey, dateMessages]: [string, MessageData[]]) => (
                     <div key={dateKey} className="px-1 lg:px-4">
                       <div className="flex items-center justify-center p-2">
                         <div className="bg-cream-300 border-2 border-terminal-black rounded-full px-4 py-1 shadow-neu">

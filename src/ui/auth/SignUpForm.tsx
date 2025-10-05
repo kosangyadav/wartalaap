@@ -163,15 +163,16 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             disabled={loading}
             autoComplete="new-password"
             required
+            showPasswordToggle={false}
           />
 
           <div className="space-y-3">
-            <label className="flex items-start gap-3 text-sm font-mono cursor-pointer">
+            <label className="flex gap-3 text-sm font-mono cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.acceptTerms}
                 onChange={(e) => handleChange("acceptTerms", e.target.checked)}
-                className="w-4 h-4 mt-0.5 border-2 border-terminal-black rounded focus:ring-2 focus:ring-accent-green"
+                className="w-4 h-4 mt-3 border-2 border-terminal-black rounded focus:ring-2 focus:ring-accent-green"
                 disabled={loading}
               />
               <span className="leading-relaxed">
@@ -192,7 +193,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
               </span>
             </label>
             {errors.acceptTerms && (
-              <div className="text-xs text-accent-red font-mono">
+              <div className="text-xs text-center text-red-700 font-mono">
                 {errors.acceptTerms}
               </div>
             )}

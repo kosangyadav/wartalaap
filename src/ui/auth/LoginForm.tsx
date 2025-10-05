@@ -18,7 +18,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
   // onForgotPassword,
   onSignUp,
   loading = false,
-  error,
   className,
 }) => {
   const [formData, setFormData] = useState({
@@ -67,27 +66,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       <CardBody>
         <form onSubmit={handleSubmit} className="space-y-6 px-4 pt-4">
-          {error && (
-            <div className="toast-error p-3 text-sm">
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>{error}</span>
-              </div>
-            </div>
-          )}
-
           <Input
             type="text"
             label="Username"
