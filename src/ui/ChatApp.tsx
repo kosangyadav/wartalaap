@@ -63,7 +63,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ className }) => {
     ? {
         id: activeConversationId,
         name: activeConversationName || "Unknown",
-        isGroup: activeConversationType,
+        isGroup: activeConversationType || false,
         status: "online" as const,
       }
     : undefined;

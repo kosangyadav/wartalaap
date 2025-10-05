@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import ConversationInfoModal from "./ConversationInfoModal";
 
 export interface ChatAreaProps {
-  conversation?: ConversationData;
+  conversation?: ConversationData | undefined;
   currentUser: UserData;
   className?: string;
   onBackToSidebar?: () => void;
@@ -21,7 +21,7 @@ export interface ChatAreaProps {
 export interface ConversationData {
   id: string;
   name: string;
-  isGroup?: boolean;
+  isGroup: boolean;
   participants?: UserData[];
   description?: string;
 }
@@ -226,7 +226,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               {showBackButton && (
                 <button
                   onClick={onBackToSidebar}
-                  className="btn-ghost btn-icon h-10 w-10 touch-manipulation"
+                  className="btn-ghost btn-icon h-10 w-10 touch-manipulation border-2 border-terminal-black"
                   aria-label="Back to conversations"
                 >
                   <svg
@@ -244,10 +244,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                   </svg>
                 </button>
               )}
-              <div className="h-12 w-12 flex items-center justify-center border-2 border-terminal-black rounded-4xl overflow-hidden pt-1.5">
+              <div className="h-12 w-12 flex items-center justify-center border-2 border-terminal-black rounded-4xl overflow-hidden pt-2.5">
                 <svg
-                  className="w-8 h-8 text-terminal-light-gray"
-                  fill="none"
+                  className="w-14 h-14 text-terminal-light-gray"
+                  fill="terminal-black"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
