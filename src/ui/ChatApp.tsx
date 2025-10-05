@@ -96,7 +96,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        "h-screen max-h-screen overflow-hidden bg-cream-100 relative",
+        "h-screen max-h-screen overflow-hidden bg-cream-100",
         className,
       )}
     >

@@ -944,8 +944,8 @@ body {
   }
 
   .sidebar {
-    max-height: calc(100vh - 2rem);
-    max-height: calc(100dvh - 2rem);
+    /*max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);*/
     border-radius: 16px;
     box-shadow: var(--shadow-neu);
   }

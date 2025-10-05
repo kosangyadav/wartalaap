@@ -426,9 +426,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                   onChange={(e) => setMessageInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Type your message..."
-                  className="flex-1 border-2 border-terminal-black rounded-3xl px-4 py-3 lg:py-2 min-h-[48px] lg:min-h-[46px] max-h-32 resize-none shadow-neu focus:shadow-neu-pressed transition-all duration-200 bg-cream-100 text-base lg:text-sm"
+                  className="flex-1 border-2 border-terminal-black rounded-3xl px-4 py-1 lg:py-2 min-h-[40px] lg:min-h-[36px] max-h-32 resize-none shadow-neu focus:shadow-neu-pressed transition-all duration-200 bg-cream-100 text-base lg:text-sm"
                   rows={1}
-                  style={{ height: "auto", minHeight: "48px" }}
+                  style={{ height: "auto", minHeight: "40px" }}
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;
                     target.style.height = "auto";
