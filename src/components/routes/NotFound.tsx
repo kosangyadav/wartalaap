@@ -1,8 +1,9 @@
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuthStore } from "../../../stores/authStore";
 
 const NotFoundPage: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream-100 via-cream-200 to-cream-300 relative overflow-hidden">
@@ -88,7 +89,15 @@ const NotFoundPage: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                onClick={() => window.history.back()}
+                onClick={() => {
+                  if (user) {
+                    // User is logged in, redirect to chat
+                    navigate("/chat", { replace: true });
+                  } else {
+                    // User is not logged in, redirect to login
+                    navigate("/login", { replace: true });
+                  }
+                }}
                 className="btn-neu bg-accent-blue border-2 border-terminal-black px-6 py-3 font-mono font-bold text-cream-100 hover:bg-accent-blue-hover transition-colors"
               >
                 ⬅️ Go Back
