@@ -11,7 +11,8 @@ import {
   ProtectedRoute,
 } from "./components/routes/protectedAndAuthRoute.tsx";
 import NotFoundPage from "./components/routes/NotFound.tsx";
-import Toast from "./ui/Toast.tsx";
+
+import ToasterConfig from "./utils/toast.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -47,7 +48,8 @@ createRoot(document.getElementById("root")!).render(
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <Toast />
+
+      <ToasterConfig />
     </BrowserRouter>
   </ConvexProvider>,
 );

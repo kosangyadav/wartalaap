@@ -63,8 +63,6 @@ const SignUp = () => {
     setError("");
 
     try {
-      console.log("Creating user:", { username, email, password });
-
       if (!username || !email || !password) {
         setError("Please fill in all required fields");
         toast.error("Please fill in all required fields");
@@ -72,8 +70,8 @@ const SignUp = () => {
       }
 
       // Check if username is already taken
+      toast("Checking username availability...", { icon: "🔍" });
       const dbResponse = await checkUserExists({ username, action: "signup" });
-      console.log("Username check response:", dbResponse);
 
       if (!dbResponse.success) {
         const errorMsg = dbResponse.message || "Username is already taken";
@@ -83,8 +81,8 @@ const SignUp = () => {
       }
 
       // Create the user
+      toast("Setting up your profile...", { icon: "⚙️" });
       const userId = await createUser({ username, email, password });
-      console.log("User created with ID:", userId);
 
       // Set user in store
       setUser({
@@ -98,7 +96,6 @@ const SignUp = () => {
 
       // Navigate to chat
       navigate("/chat");
-      console.log("Sign up successful");
     } catch (err) {
       console.error("Sign up error:", err);
       const errorMsg = "An unexpected error occurred. Please try again.";
@@ -149,7 +146,7 @@ const SignUp = () => {
         </div>
 
         {/* Form Section - Flexible */}
-        <div className="flex-1 flex items-start md:items-center justify-center px-4 pb-4">
+        <div className="flex-1 flex items-start md:items-center justify-center px-4 pb-8">
           <div className="w-full max-w-md">
             <SignUpForm
               onSubmit={handleSignUp}

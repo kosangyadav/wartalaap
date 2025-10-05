@@ -56,7 +56,7 @@ const SignIn = () => {
     setError("");
 
     try {
-      console.log("Logging in user:", { username, password });
+      toast("Signing you in...", { icon: "⏳" });
 
       if (!username || !password) {
         const errorMsg = "Please enter both username and password";
@@ -65,8 +65,8 @@ const SignIn = () => {
         return;
       }
 
+      toast("Verifying credentials...", { icon: "🔍" });
       const dbResponse = await checkUserAuth({ username, password });
-      console.log("Auth response:", dbResponse);
 
       if (!dbResponse.success) {
         const errorMsg = dbResponse.message || "Login failed";
@@ -76,6 +76,7 @@ const SignIn = () => {
       }
 
       // Set user in store
+      toast("Loading your profile...", { icon: "⚙️" });
       setUser({
         id: dbResponse.userId || "",
         username,
@@ -87,7 +88,6 @@ const SignIn = () => {
 
       // Navigate to chat
       navigate("/chat");
-      console.log("Login successful");
     } catch (err) {
       console.error("Login error:", err);
       const errorMsg = "An unexpected error occurred. Please try again.";
@@ -104,8 +104,11 @@ const SignIn = () => {
 
   const handleForgotPassword = () => {
     // TODO: Implement forgot password functionality
-    console.log("Forgot password clicked");
-    toast("Forgot password feature coming soon!", { icon: "🔧" });
+
+    toast("Forgot password feature coming soon! Check back later.", {
+      icon: "🔧",
+      duration: 3000,
+    });
   };
 
   return (
