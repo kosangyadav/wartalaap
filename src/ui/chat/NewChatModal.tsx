@@ -5,6 +5,7 @@ import { useAuthStore } from "../../../stores/authStore";
 import Button from "../Button";
 import { SearchInput } from "../Input";
 import Card, { CardHeader, CardBody, CardFooter } from "../Card";
+import { useUIStore } from "../../../stores/uiStore";
 
 import { cn } from "../../utils/cn";
 
@@ -12,8 +13,6 @@ export interface NewChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   setSelectedChat: (conversationId: string, conversationName: string) => void;
-  loading?: boolean;
-  error?: string;
 }
 
 export interface UserData {
@@ -27,19 +26,16 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
   isOpen,
   onClose,
   setSelectedChat,
-  loading = false,
-  error,
 }) => {
   const [searchName, setSearchName] = useState("");
-  const [unselectedUsersList, setUnselectedUsersList] = useState<UserData[]>(
-    [],
-  );
-  const [selectedUsersList, setSelectedUsersList] = useState<UserData[]>([]);
-  const [filterList, setFilterList] = useState<UserData[]>([]);
+  const [usersList, setUsersList] = useState<UserData[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<UserData[]>([]);
   const [groupName, setGroupName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const { user } = useAuthStore();
+  const { isMobile } = useUIStore();
 
   const listUsersAction = useAction(api.createChat.getUsersByUsername);
 
@@ -57,13 +53,9 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
     setIsSearching(true);
     try {
       const usernameList = await listUsersAction({ username: searchName });
-      setUnselectedUsersList(
-        usernameList.filter(
-          (users: UserData) => users.username !== user?.username,
-        ),
+      setUsersList(
+        usernameList.filter((u: UserData) => u.username !== user?.username),
       );
-      setFilterList(filterList);
-      console.log("from db call", { usersList: usernameList });
     } catch (error) {
       console.error("Failed to fetch users:", error);
     } finally {
@@ -72,100 +64,88 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
   };
 
   const createNewConversation = async () => {
-    console.log("function called");
-    let conversationId;
-    console.log(user?.id);
-    if (selectedUsersList.length === 1) {
-      conversationId = await create1on1Conversation({
-        userId1: user?.id as string,
-        userId2: selectedUsersList[0]?._id as string,
-      });
-    } else {
-      if (!groupName) {
-        console.log("enter the group name first...");
-        return;
-      }
-      console.log("group chat creating...");
-      const memberIds = selectedUsersList.map((user) => user?._id as string);
-      memberIds.push(user?.id as string);
+    if (selectedUsers.length === 0) return;
 
-      conversationId = await createGroupConversation({
-        name: groupName,
-        // @ts-expect-error - Type conversion needed for Convex ID types
-        memberIds,
-      });
+    setIsCreating(true);
+    try {
+      let conversationId;
+
+      if (selectedUsers.length === 1) {
+        conversationId = await create1on1Conversation({
+          userId1: user?.id as string,
+          userId2: selectedUsers[0]?._id as string,
+        });
+      } else {
+        if (!groupName.trim()) return;
+        const memberIds = selectedUsers.map((u) => u._id as string);
+        memberIds.push(user?.id as string);
+
+        conversationId = await createGroupConversation({
+          name: groupName,
+          // @ts-expect-error - Type conversion needed for Convex ID types
+          memberIds,
+        });
+      }
+
+      setSelectedChat(conversationId, groupName || selectedUsers[0]?.username);
+      onClose();
+    } catch (error) {
+      console.error("Failed to create conversation:", error);
+    } finally {
+      setIsCreating(false);
     }
-    console.log(conversationId);
-    setSelectedChat({
-      conversationId,
-      conversationName: groupName ? groupName : selectedUsersList[0]?.username,
-    });
-    onClose();
   };
 
+  const filteredUsers = usersList.filter((user) =>
+    user.username.toLowerCase().includes(searchName.toLowerCase()),
+  );
+
   useEffect(() => {
-    setFilterList(
-      unselectedUsersList.filter((user) =>
-        user?.username?.includes(searchName),
-      ),
-    );
-
-    console.log(searchName, { filterList }, { unselectedUsersList });
-  }, [searchName, unselectedUsersList]);
-
-  React.useEffect(() => {
     if (!isOpen) {
-      // Reset form when modal closes
       setSearchName("");
-      setUnselectedUsersList([]);
-      setSelectedUsersList([]);
-      setFilterList([]);
+      setUsersList([]);
+      setSelectedUsers([]);
       setGroupName("");
     }
   }, [isOpen]);
 
-  const handleUserToggle = (user: UserData, isSelected: boolean) => {
-    if (isSelected) {
-      // Remove from selected, add back to unselected
-      setUnselectedUsersList((state) => [...state, user]);
-      setSelectedUsersList((state) => state.filter((u) => u._id !== user._id));
-    } else {
-      // Add to selected, remove from unselected
-      setSelectedUsersList((state) => [...state, user]);
-      setUnselectedUsersList((state) =>
-        state.filter((u) => u._id !== user._id),
-      );
-    }
+  const handleUserToggle = (user: UserData) => {
+    setSelectedUsers((prev) =>
+      prev.some((u) => u._id === user._id)
+        ? prev.filter((u) => u._id !== user._id)
+        : [...prev, user],
+    );
   };
 
   const canCreate =
-    selectedUsersList.length > 0 &&
-    (selectedUsersList.length === 1 || groupName.trim());
+    selectedUsers.length > 0 &&
+    (selectedUsers.length === 1 || groupName.trim());
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <Card
-        className="modal-content max-w-lg w-full"
+        className="modal-content w-full max-w-sm sm:max-w-md lg:max-w-lg mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <CardHeader
           title="New Chat"
           subtitle={
-            selectedUsersList.length === 0
+            selectedUsers.length === 0
               ? "Search and select people to start a conversation"
-              : selectedUsersList.length === 1
-                ? `Direct message with ${selectedUsersList[0].username}`
-                : `Group chat with ${selectedUsersList.length} people`
+              : selectedUsers.length === 1
+                ? `Direct message with ${selectedUsers[0].username}`
+                : `Group chat with ${selectedUsers.length} people`
           }
           action={
             <button
               onClick={onClose}
-              className="p-2 hover:bg-cream-300 rounded-full transition-colors"
+              className="btn-ghost btn-icon h-8 w-8 touch-manipulation"
+              aria-label="Close modal"
             >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -181,97 +161,68 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
           }
         />
 
-        <CardBody className="max-h-96 overflow-y-auto">
-          {error && (
-            <div className="toast-error p-3 text-sm mb-4">
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-4 h-4 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>{error}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Search Input */}
-          <div className="mb-4">
-            <form onSubmit={fetchUsers} className="flex gap-2">
+        <CardBody className="max-h-80 lg:max-h-96 overflow-y-auto pt-4">
+          <div>
+            <form onSubmit={fetchUsers} className="flex gap-2 mb-2">
               <SearchInput
-                placeholder="Enter username to search..."
+                placeholder="Search username..."
                 value={searchName}
-                onChange={(e) => {
-                  setSearchName(e.target.value);
-                  console.log({ usersList: unselectedUsersList });
-                }}
+                onChange={(e) => setSearchName(e.target.value)}
                 onClear={() => setSearchName("")}
-                className="flex-1"
+                className="flex-1 text-base lg:text-sm"
               />
               <Button
                 type="submit"
                 variant="primary"
                 disabled={!searchName.trim() || isSearching}
                 loading={isSearching}
-                className="whitespace-nowrap"
+                className="px-4 touch-manipulation"
+                size={isMobile ? "sm" : "md"}
               >
-                {isSearching ? "Searching..." : "Search"}
+                Search
               </Button>
             </form>
           </div>
 
-          {/* Selected Users */}
-          {selectedUsersList.length > 0 && (
+          {selectedUsers.length > 0 && (
             <div className="mb-4 p-3 bg-cream-300 rounded-neu border-2 border-terminal-black">
               <h4 className="font-mono font-bold text-sm text-terminal-black mb-2">
-                Selected Users ({selectedUsersList.length})
+                Selected ({selectedUsers.length})
               </h4>
               <div className="flex flex-wrap gap-2">
-                {selectedUsersList.map((user) => (
+                {selectedUsers.map((user) => (
                   <div
                     key={user._id}
-                    className="flex items-center gap-2 bg-cream-100 rounded-neu px-3 py-1 border-2 border-terminal-black"
+                    className="flex items-center gap-2 bg-cream-100 rounded-neu p-2 border-2 border-terminal-black"
+                    onClick={() => handleUserToggle(user)}
                   >
                     <span className="text-sm font-mono">{user.username}</span>
-                    <button
-                      onClick={() => handleUserToggle(user, true)}
-                      className="text-terminal-light-gray hover:text-accent-red transition-colors"
+
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Group Name Input */}
-          {selectedUsersList.length > 1 && (
+          {selectedUsers.length > 1 && (
             <div className="mb-4">
               <label className="form-label">Group Name</label>
               <input
                 type="text"
-                className="input-neu"
+                className="input-neu text-base lg:text-sm"
                 placeholder="Enter group name..."
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
@@ -280,26 +231,11 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
             </div>
           )}
 
-          {/* Action Preview */}
-          <div className="mb-4 p-3 bg-cream-200 rounded-neu border-2 border-terminal-black">
-            <h4 className="font-mono font-bold text-sm text-terminal-black mb-1">
-              Action Preview:
-            </h4>
-            <p className="text-sm text-terminal-light-gray">
-              {selectedUsersList.length === 0
-                ? "No action specified..."
-                : selectedUsersList.length === 1
-                  ? `Creating a 1-on-1 chat with ${selectedUsersList[0].username}...`
-                  : `Creating a group chat with ${selectedUsersList.length} other members...`}
-            </p>
-          </div>
-
-          {/* Users List */}
           <div className="space-y-2">
             {isSearching ? (
               <div className="space-y-3">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="flex items-center gap-3">
+                  <div key={index} className="flex items-center gap-3 p-3">
                     <div className="loading-skeleton w-10 h-10 rounded-full" />
                     <div className="flex-1 space-y-2">
                       <div className="loading-skeleton h-4 w-32" />
@@ -308,7 +244,7 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
                   </div>
                 ))}
               </div>
-            ) : filterList.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8">
                 <svg
                   className="w-12 h-12 mx-auto text-terminal-light-gray mb-4"
@@ -324,136 +260,103 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
                   />
                 </svg>
                 <h3 className="font-mono font-bold text-terminal-black mb-2">
-                  {searchName
-                    ? "No more users found"
-                    : "Search for users to add"}
+                  {usersList.length === 0
+                    ? "Search for users"
+                    : "No users found"}
                 </h3>
                 <p className="text-terminal-light-gray text-sm">
-                  {searchName
-                    ? "Try a different search term"
-                    : "Enter a username and click search to find users"}
+                  {usersList.length === 0
+                    ? "Enter a username to find people"
+                    : "Try a different search term"}
                 </p>
               </div>
             ) : (
-              <>
-                <h4 className="font-mono font-bold text-sm text-terminal-black mb-3">
-                  Available Users ({filterList.length})
-                </h4>
-                {filterList.map((user) => {
-                  const isSelected = selectedUsersList.some(
-                    (u) => u._id === user._id,
-                  );
-                  return (
-                    <div
-                      key={user._id}
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-neu border-2 cursor-pointer transition-all duration-200",
-                        isSelected
-                          ? "bg-accent-green text-white border-terminal-black shadow-retro"
-                          : "bg-cream-200 border-terminal-black hover:bg-cream-300 hover:shadow-neu-lg",
-                      )}
-                      onClick={() => handleUserToggle(user, isSelected)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <h3
+              filteredUsers.map((user) => {
+                const isSelected = selectedUsers.some(
+                  (u) => u._id === user._id,
+                );
+                return (
+                  <div
+                    key={user._id}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-neu border-2 cursor-pointer transition-all duration-200 touch-manipulation",
+                      isSelected
+                        ? "bg-accent-green border-terminal-black"
+                        : "bg-cream-200 border-terminal-black hover:bg-cream-300",
+                    )}
+                    onClick={() => handleUserToggle(user)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <h3
+                        className={cn("font-mono font-bold text-sm truncate")}
+                      >
+                        {user.username}
+                      </h3>
+                      {user.email && (
+                        <p
                           className={cn(
-                            "font-mono font-bold text-sm truncate",
-                            isSelected ? "text-white" : "text-terminal-black",
+                            "text-xs truncate",
+                            isSelected
+                              ? "text-terminal-light-gray"
+                              : "text-terminal-light-gray",
                           )}
                         >
-                          {user.username}
-                        </h3>
-                        {user.email && (
-                          <p
-                            className={cn(
-                              "text-xs truncate",
-                              isSelected
-                                ? "text-cream-100"
-                                : "text-terminal-light-gray",
-                            )}
-                          >
-                            {user.email}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-1 mt-1">
-                          <div
-                            className={cn(
-                              "w-2 h-2 rounded-full border",
-                              isSelected
-                                ? "border-white"
-                                : "border-terminal-black",
-                              user.status === "online"
-                                ? "bg-status-online"
-                                : user.status === "away"
-                                  ? "bg-status-away"
-                                  : user.status === "busy"
-                                    ? "bg-status-busy"
-                                    : "bg-status-offline",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "text-xs font-mono capitalize",
-                              isSelected
-                                ? "text-cream-100"
-                                : "text-terminal-light-gray",
-                            )}
-                          >
-                            {user.status || "offline"}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className={cn(
-                          "flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
-                          isSelected
-                            ? "bg-white border-white"
-                            : "border-terminal-black",
-                        )}
-                      >
-                        {isSelected && (
-                          <svg
-                            className="w-3 h-3 text-accent-green"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </div>
+                          {user.email}
+                        </p>
+                      )}
                     </div>
-                  );
-                })}
-              </>
+                    <div
+                      className={cn(
+                        "w-5 h-5 rounded border-2 flex items-center justify-center",
+                        isSelected
+                          ? "bg-cream-100 border-cream-100"
+                          : "border-terminal-black",
+                      )}
+                    >
+                      {isSelected && (
+                        <svg
+                          className="w-3 h-3 text-accent-green"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </CardBody>
 
         <CardFooter>
-          <Button variant="ghost" onClick={onClose} disabled={loading}>
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            disabled={isCreating}
+            className="touch-manipulation"
+            size={isMobile ? "sm" : "md"}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
-            onClick={async () => {
-              if (selectedUsersList.length !== 0) {
-                await createNewConversation();
-              } else {
-                console.log("no user is selected...");
-              }
-            }}
-            disabled={!canCreate || loading}
-            loading={loading}
+            onClick={createNewConversation}
+            disabled={!canCreate || isCreating}
+            loading={isCreating}
+            className="touch-manipulation"
+            size={isMobile ? "sm" : "md"}
           >
-            {loading
+            {isCreating
               ? "Creating..."
-              : selectedUsersList.length === 1
+              : selectedUsers.length === 1
                 ? "Start Chat"
                 : "Create Group"}
           </Button>

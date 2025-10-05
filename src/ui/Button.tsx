@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '../utils/cn';
+import React from "react";
+import { cn } from "../utils/cn";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -28,7 +28,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const baseClasses = "btn-neu animate-press focus-ring";
+    const baseClasses = "btn-neu animate-press focus-ring rounded-2xl";
 
     const variantClasses = {
       primary: "btn-primary",

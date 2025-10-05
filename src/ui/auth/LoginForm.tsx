@@ -134,7 +134,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       />
 
       <CardBody>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 px-4 pt-4">
           {error && (
             <div className="toast-error p-3 text-sm">
               <div className="flex items-center gap-2">
@@ -239,7 +239,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             size="lg"
             fullWidth
             loading={loading}
-            className="font-mono"
+            className="font-mono rounded-4xl"
           >
             {loading ? "Signing In..." : "Sign In"}
           </Button>

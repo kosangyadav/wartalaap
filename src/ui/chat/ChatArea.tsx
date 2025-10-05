@@ -8,11 +8,14 @@ import { useAuthStore } from "../../../stores/authStore";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import toast from "react-hot-toast";
+import ConversationInfoModal from "./ConversationInfoModal";
 
 export interface ChatAreaProps {
   conversation?: ConversationData;
   currentUser: UserData;
   className?: string;
+  onBackToSidebar?: () => void;
+  showBackButton?: boolean;
 }
 
 export interface ConversationData {
@@ -31,12 +34,6 @@ export interface MessageData {
   conversationId: string;
 }
 
-export interface MessageReaction {
-  emoji: string;
-  userId: string;
-  userName: string;
-}
-
 export interface UserData {
   id: string;
   username: string;
@@ -46,13 +43,15 @@ export interface UserData {
 
 const ChatArea: React.FC<ChatAreaProps> = ({
   conversation,
-  currentUser,
   className,
+  onBackToSidebar,
+  showBackButton = false,
 }) => {
   const { user } = useAuthStore();
   const [messageInput, setMessageInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -67,15 +66,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     api.conversation.sendMsgToConversation,
   );
 
-  const isNearBottom = useCallback(() => {
-    if (!messagesContainerRef.current) return true;
-    const container = messagesContainerRef.current;
-    return (
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      100
-    );
-  }, []);
-
   const scrollToBottom = useCallback(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
@@ -85,21 +75,24 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (isNearBottom()) {
-      scrollToBottom();
-    }
-  }, [messages, isNearBottom, scrollToBottom]);
+  const handleScroll = useCallback(() => {
+    if (!messagesContainerRef.current || !messages?.length) return;
+    const container = messagesContainerRef.current;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+    setShowScrollButton(!isNearBottom && messages.length > 5);
+  }, [messages]);
 
   useEffect(() => {
-    if (conversation && messages?.length) {
+    if (messages?.length) {
       setTimeout(scrollToBottom, 100);
     }
-  }, [conversation, messages?.length, scrollToBottom]);
+  }, [conversation?.id, messages?.length, scrollToBottom]);
 
-  const handleScroll = () => {
-    setShowScrollButton(!isNearBottom() && !!(messages && messages.length > 5));
-  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages?.length, scrollToBottom]);
 
   const handleSendMessage = async () => {
     const content = messageInput.trim();
@@ -135,29 +128,20 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const hours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
-    );
+    const diffHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
-    if (hours < 1) {
+    if (diffHours < 24) {
       return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } else if (hours < 24) {
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-    } else {
-      return date.toLocaleDateString([], {
-        month: "short",
-        day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
       });
     }
+    return date.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const formatMessageDate = (timestamp: number) => {
@@ -166,17 +150,14 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    if (date.toDateString() === today.toDateString()) {
-      return "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString([], {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-      });
-    }
+    const dateStr = date.toDateString();
+    if (dateStr === today.toDateString()) return "Today";
+    if (dateStr === yesterday.toDateString()) return "Yesterday";
+    return date.toLocaleDateString([], {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const groupedMessages =
@@ -240,7 +221,51 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     >
       <Card className="flex-1 flex flex-col overflow-hidden" padding="none">
         <CardHeader
-          title={conversation.name}
+          title={
+            <div className="flex items-center gap-3">
+              {showBackButton && (
+                <button
+                  onClick={onBackToSidebar}
+                  className="btn-ghost btn-icon h-10 w-10 touch-manipulation"
+                  aria-label="Back to conversations"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                </button>
+              )}
+              <div className="h-12 w-12 flex items-center justify-center border-2 border-terminal-black rounded-4xl overflow-hidden pt-1.5">
+                <svg
+                  className="w-8 h-8 text-terminal-light-gray"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={
+                      conversation.isGroup
+                        ? "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                        : "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    }
+                  />
+                </svg>
+              </div>
+              {conversation.name}
+            </div>
+          }
           action={
             <div className="flex items-center gap-2">
               <IconButton
@@ -261,6 +286,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 }
                 tooltip="Conversation Info"
                 variant="ghost"
+                onClick={() => setIsInfoModalOpen(true)}
               />
             </div>
           }
@@ -302,7 +328,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               ) : (
                 Object.entries(groupedMessages).map(
                   ([dateKey, dateMessages]) => (
-                    <div key={dateKey} className="px-4">
+                    <div key={dateKey} className="px-1 lg:px-4">
                       <div className="flex items-center justify-center p-2">
                         <div className="bg-cream-300 border-2 border-terminal-black rounded-full px-4 py-1 shadow-neu">
                           <span className="text-xs font-mono font-bold text-terminal-black">
@@ -314,41 +340,41 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                       {dateMessages.map((message, index) => {
                         const isOwnMessage = message.senderId === user?.id;
                         const prevMessage = dateMessages[index - 1];
-                        const showAvatar =
-                          !isOwnMessage &&
-                          (!prevMessage ||
-                            prevMessage.senderId !== message.senderId);
+                        const isNewSender =
+                          prevMessage?.senderId !== message.senderId;
 
                         return (
                           <div
                             key={message._id}
                             className={cn(
-                              "flex gap-2 group",
+                              "flex gap-1 md:gap-3 group",
                               isOwnMessage ? "flex-row-reverse" : "flex-row",
-                              prevMessage?.senderId !== message.senderId
-                                ? "mt-4"
-                                : "mt-2",
+                              isNewSender ? "mt-4" : "mt-1",
                             )}
                           >
                             {!isOwnMessage && conversation.isGroup && (
                               <div
                                 className={cn(
-                                  "flex-shrink-0",
-                                  showAvatar ? "opacity-100" : "opacity-0",
+                                  "w-8 h-8 flex-shrink-0",
+                                  !isNewSender && "opacity-0",
                                 )}
                               >
-                                <div className="w-8 h-8 rounded-full bg-accent-blue border-2 border-terminal-black shadow-neu flex items-center justify-center">
-                                  <span className="text-xs font-mono font-bold">
-                                    {currentUser.username[0]?.toUpperCase()}
-                                  </span>
-                                </div>
+                                {isNewSender && (
+                                  <div className="w-8 h-8 rounded-full bg-accent-blue border-2 border-terminal-black shadow-neu flex items-center justify-center">
+                                    <span className="text-xs font-mono font-bold text-white">
+                                      U
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             )}
 
                             <div
                               className={cn(
-                                "flex-1 max-w-md",
-                                isOwnMessage ? "text-right" : "text-left",
+                                "flex-1",
+                                isOwnMessage
+                                  ? "flex justify-end"
+                                  : "flex justify-start",
                               )}
                             >
                               <MessageBubble
@@ -358,10 +384,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                                   message._creationTime,
                                 )}
                                 status="delivered"
-                                className={cn(
-                                  "transition-all duration-200",
-                                  isOwnMessage ? "ml-auto" : "mr-auto",
-                                )}
+                                className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl"
                               />
                             </div>
                           </div>
@@ -374,13 +397,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 
               {showScrollButton && (
                 <button
-                  className="fixed bottom-30 right-9 bg-accent-blue border-2 border-terminal-black rounded-full p-2 shadow-neu hover:shadow-neu-pressed transition-all"
+                  className="fixed bottom-24 right-6 lg:bottom-28 lg:right-8 bg-accent-blue border-2 border-terminal-black rounded-full p-3 shadow-neu hover:shadow-neu-pressed transition-all z-10 touch-manipulation"
                   onClick={scrollToBottom}
                   aria-label="Scroll to bottom"
                 >
                   <svg
-                    className="w-5 h-5"
-                    fill="accent-blue"
+                    className="w-4 h-4"
+                    fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -395,61 +418,58 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               )}
             </div>
 
-            {/*send message section*/}
-            <div className="bg-cream-100 px-4 pt-1 pb-2">
-              <div className="flex gap-3 items-center">
-                <div className="flex-1">
-                  <Textarea
-                    ref={inputRef}
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type your message here..."
-                    className={`border-2 border-terminal-black rounded-3xl px-4 py-2 min-h-[46px] max-h-32 resize-none shadow-neu focus:shadow-neu-pressed transition-all duration-200 bg-white overflow-auto`}
-                    rows={1}
-                    style={{
-                      height: "auto",
-                      minHeight: "46px",
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement;
-                      target.style.height = "auto";
-                      target.style.height =
-                        Math.min(target.scrollHeight, 128) + "px";
-                    }}
-                    disabled={isSending}
-                  />
-                </div>
+            <div className="bg-cream-100 p-3 lg:px-4 lg:pt-1 lg:pb-2">
+              <div className="flex gap-2 lg:gap-3 items-end">
+                <Textarea
+                  ref={inputRef}
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your message..."
+                  className="flex-1 border-2 border-terminal-black rounded-3xl px-4 py-3 lg:py-2 min-h-[48px] lg:min-h-[46px] max-h-32 resize-none shadow-neu focus:shadow-neu-pressed transition-all duration-200 bg-cream-100 text-base lg:text-sm"
+                  rows={1}
+                  style={{ height: "auto", minHeight: "48px" }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = "auto";
+                    target.style.height =
+                      Math.min(target.scrollHeight, 128) + "px";
+                  }}
+                  disabled={isSending}
+                />
                 <Button
                   variant="primary"
                   onClick={handleSendMessage}
                   disabled={!messageInput.trim() || isSending}
                   loading={isSending}
-                  className="h-11 w-10.5 rounded-full flex-shrink-0 shadow-neu hover:shadow-neu-pressed transition-all duration-200"
+                  className="h-12 w-12 lg:h-11 lg:w-11 rounded-full flex-shrink-0 shadow-neu hover:shadow-neu-pressed transition-all duration-200 touch-manipulation"
                 >
-                  {isSending ? (
-                    <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  ) : (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                      />
-                    </svg>
-                  )}
+                  <svg
+                    className="w-5 h-5 lg:w-4 lg:h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
                 </Button>
               </div>
             </div>
           </div>
         </CardBody>
       </Card>
+
+      {/* Conversation Info Modal */}
+      <ConversationInfoModal
+        isOpen={isInfoModalOpen}
+        onClose={() => setIsInfoModalOpen(false)}
+        conversation={conversation}
+      />
     </div>
   );
 };

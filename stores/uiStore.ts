@@ -1,16 +1,16 @@
 import { create } from "zustand";
 
 interface UIStore {
-  isSidebarOpen: boolean;
-  toggleSidebar: () => void;
-  darkMode: boolean;
-  toggleDarkMode: () => void;
+  isMobile: boolean;
+  setIsMobile: (mobile: boolean) => void;
 }
 
+const getIsMobile = () => {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < 1024;
+};
+
 export const useUIStore = create<UIStore>((set) => ({
-  isSidebarOpen: true,
-  toggleSidebar: () =>
-    set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
-  darkMode: true,
-  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+  isMobile: getIsMobile(),
+  setIsMobile: (mobile: boolean) => set({ isMobile: mobile }),
 }));

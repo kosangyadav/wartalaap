@@ -199,7 +199,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       />
 
       <CardBody>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-4 pt-4">
           {error && (
             <div className="toast-error p-3 text-sm">
               <div className="flex items-center gap-2">
@@ -379,7 +379,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             size="lg"
             fullWidth
             loading={loading}
-            className="font-mono"
+            className="font-mono rounded-4xl"
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </Button>

@@ -36,7 +36,7 @@ export interface MessageBubbleProps
   type: "sent" | "received" | "system";
   message: string;
   timestamp?: string;
-
+  avatar?: React.ReactNode;
   username?: string;
   status?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
@@ -46,105 +46,13 @@ export const MessageBubble = React.forwardRef<
   MessageBubbleProps
 >(
   (
-    { className, type, message, timestamp, avatar, username, status, ...props },
+    { className, type, message, timestamp, avatar, username, ...props },
     ref,
   ) => {
     const bubbleClasses = {
       sent: "message-sent",
       received: "message-received",
       system: "message-system",
-    };
-
-    const statusIcons = {
-      sending: (
-        <svg
-          className="w-4 h-4 animate-spin"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2v4m0 12v4m8-8h-4M6 12H2m15.364-7.364l-2.828 2.828M9.464 9.464l-2.828-2.828m12.728 12.728l-2.828-2.828M9.464 14.536l-2.828 2.828"
-          />
-        </svg>
-      ),
-      sent: (
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-      ),
-      delivered: (
-        <div className="flex">
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-          <svg
-            className="w-4 h-4 -ml-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        </div>
-      ),
-      read: (
-        <div className="flex text-accent-blue">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-          <svg
-            className="w-4 h-4 -ml-2"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      ),
-      failed: (
-        <svg
-          className="w-4 h-4 text-accent-red"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
     };
 
     if (type === "system") {
@@ -288,8 +196,9 @@ export const ConversationItem = React.forwardRef<
 ConversationItem.displayName = "ConversationItem";
 
 // Card Header Component
-export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string;
+export interface CardHeaderProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  title: React.ReactNode | string;
   subtitle?: string;
   action?: React.ReactNode;
 }

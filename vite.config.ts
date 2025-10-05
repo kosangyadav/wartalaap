@@ -11,5 +11,6 @@ export default defineConfig({
     // open: true,      // Automatically opens the application in the default web browser when the server starts.
     strictPort: true, // Ensures that if the specified port (5173) is already in use, the server will not start and will instead throw an error. This prevents Vite from automatically switching to a different port.
     cors: true, // Enables Cross-Origin Resource Sharing (CORS) for the development server, allowing resources to be requested from different domains.
+    // allowedHosts: ["poetic-uniformly-jackal.ngrok-free.app"],
   },
 });

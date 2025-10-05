@@ -43,7 +43,12 @@ export type { AuthLayoutProps } from "./auth/AuthLayout";
 export { default as Sidebar } from "./chat/Sidebar";
 export { default as ChatArea } from "./chat/ChatArea";
 export { default as NewChatModal } from "./chat/NewChatModal";
+export { default as ConversationInfoModal } from "./chat/ConversationInfoModal";
 export { default as ChatApp } from "./ChatApp";
+
+// UI Components
+export { default as Modal } from "./Modal";
+export type { ModalProps } from "./Modal";
 export type {
   SidebarProps,
   ConversationData as SidebarConversationData,
@@ -60,6 +65,7 @@ export type {
   NewChatModalProps,
   UserData as NewChatModalUserData,
 } from "./chat/NewChatModal";
+export type { ConversationInfoModalProps } from "./chat/ConversationInfoModal";
 export type {
   ChatAppProps,
   UserData as ChatAppUserData,

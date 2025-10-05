@@ -36,15 +36,16 @@ export const checkExisting1on1Conversation = query({
       .withIndex("by_pairKey", (q) => q.eq("pairKey", pairKey))
       .first();
 
-    if (!existingConversations || existingConversations?.length === 0) {
+    console.log(existingConversations);
+    if (!existingConversations) {
       return null;
     }
     console.log("checkExisting1on1Conversation : ", {
       pairKey,
-      ConversationId: existingConversations?.[0].ConversationId,
+      ConversationId: existingConversations?._id,
     });
     // Return the existing conversation ID
-    return existingConversations?.[0].conversationId;
+    return existingConversations?._id;
   },
 });
 

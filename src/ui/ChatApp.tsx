@@ -4,7 +4,6 @@ import ChatArea from "./chat/ChatArea";
 import NewChatModal from "./chat/NewChatModal";
 import { cn } from "../utils/cn";
 import { useUIStore } from "../../stores/uiStore";
-import toast from "react-hot-toast";
 
 export interface ChatAppProps {
   currentUser: UserData;
@@ -48,9 +47,22 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
   const [activeConversationType, setActiveConversationType] =
     useState<boolean>();
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<"sidebar" | "chat">("sidebar");
 
   // UI Store
-  const { isSidebarOpen } = useUIStore();
+  const { setIsMobile, isMobile } = useUIStore();
+
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 1024;
+      setIsMobile(isMobile);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [setIsMobile]);
 
   // Get active conversation data
   const activeConversation = activeConversationId
@@ -71,59 +83,38 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
     setActiveConversationName(conversationName);
     setActiveConversationType(isGroup);
 
-    // TODO: Mark conversation as read
-    // await api.conversations.markAsRead(conversationId);
+    if (isMobile) {
+      setMobileView("chat");
+    }
   };
 
-  const handleNewChat = () => {
-    setIsNewChatModalOpen(true);
+  const handleNewChat = () => setIsNewChatModalOpen(true);
+
+  const handleSetSelectedChat = (
+    conversationId: string,
+    conversationName: string,
+  ) => {
+    handleSelectConversation(conversationId, conversationName, false);
   };
 
-  // TODO: WebSocket message handler
-  // const handleWebSocketMessage = (data: any) => {
-  //   switch (data.type) {
-  //     case 'new_message':
-  //       setMessages(prev => [...prev, data.message]);
-  //       // Update conversation last message
-  //       setConversations(prev => prev.map(conv =>
-  //         conv.id === data.message.conversationId
-  //           ? { ...conv, lastMessage: data.message.content, timestamp: data.message.timestamp }
-  //           : conv
-  //       ));
-  //       break;
-  //     case 'typing':
-  //       if (data.conversationId === activeConversationId) {
-  //         setTypingUsers(prev =>
-  //           data.isTyping
-  //             ? [...prev.filter(u => u.id !== data.userId), data.user]
-  //             : prev.filter(u => u.id !== data.userId)
-  //         );
-  //       }
-  //       break;
-  //     case 'user_status_changed':
-  //       setAvailableUsers(prev => prev.map(user =>
-  //         user.id === data.userId ? { ...user, status: data.status } : user
-  //       ));
-  //       break;
-  //     case 'conversation_updated':
-  //       setConversations(prev => prev.map(conv =>
-  //         conv.id === data.conversation.id ? data.conversation : conv
-  //       ));
-  //       break;
-  //   }
-  // };
+  const handleBackToSidebar = () => setMobileView("sidebar");
 
   return (
     <div
       className={cn(
-        "h-screen max-h-screen overflow-hidden bg-cream-100",
+        "h-screen max-h-screen overflow-hidden bg-cream-100 relative",
         className,
       )}
     >
-      {/* Main Chat Layout */}
       <div className="grid-chat overflow-hidden">
         {/* Sidebar */}
-        <div className="sidebar-area min-h-0">
+        <div
+          className={cn(
+            "sidebar-area min-h-0",
+            "lg:block",
+            !isMobile || mobileView === "sidebar" ? "block" : "hidden",
+          )}
+        >
           <Sidebar
             onSelectConversation={handleSelectConversation}
             onNewChat={handleNewChat}
@@ -132,11 +123,19 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
         </div>
 
         {/* Chat Area */}
-        <div className="chat-main-area min-h-0">
+        <div
+          className={cn(
+            "chat-main-area min-h-0 w-full",
+            "lg:block",
+            !isMobile || mobileView === "chat" ? "block" : "hidden",
+          )}
+        >
           <ChatArea
             conversation={activeConversation}
             currentUser={currentUser}
             className="h-full"
+            onBackToSidebar={handleBackToSidebar}
+            showBackButton={isMobile && mobileView === "chat"}
           />
         </div>
       </div>
@@ -145,33 +144,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ currentUser, className }) => {
       <NewChatModal
         isOpen={isNewChatModalOpen}
         onClose={() => setIsNewChatModalOpen(false)}
-        setSelectedChat={handleSelectConversation}
+        setSelectedChat={handleSetSelectedChat}
       />
-
-      {/* Mobile Sidebar Toggle */}
-      {!isSidebarOpen && (
-        <button
-          className="fixed top-4 left-4 z-40 btn-primary btn-icon lg:hidden"
-          onClick={() => {
-            const { toggleSidebar } = useUIStore.getState();
-            toggleSidebar();
-          }}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      )}
     </div>
   );
 };
