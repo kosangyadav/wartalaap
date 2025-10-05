@@ -35,8 +35,8 @@ export type {
 
 // Authentication Components
 export { default as AuthLayout } from "./auth/AuthLayout";
-export type { LoginFormProps, LoginFormData } from "./auth/LoginForm";
-export type { SignUpFormProps, SignUpFormData } from "./auth/SignUpForm";
+// export type { LoginFormProps, LoginFormData } from "./auth/LoginForm";
+// export type { SignUpFormProps, SignUpFormData } from "./auth/SignUpForm";
 export type { AuthLayoutProps } from "./auth/AuthLayout";
 
 // Chat Components
@@ -47,18 +47,18 @@ export { default as ConversationInfoModal } from "./chat/ConversationInfoModal";
 export { default as ChatApp } from "./ChatApp";
 
 // UI Components
-export { default as Modal } from "./Modal";
-export type { ModalProps } from "./Modal";
+// export { default as Modal } from "./Modal";
+// export type { ModalProps } from "./Modal";
 export type {
   SidebarProps,
   ConversationData as SidebarConversationData,
-  UserData as SidebarUserData,
+  // UserData as SidebarUserData,
 } from "./chat/Sidebar";
 export type {
   ChatAreaProps,
   ConversationData as ChatAreaConversationData,
   MessageData,
-  MessageReaction,
+  // MessageReaction,
   UserData as ChatAreaUserData,
 } from "./chat/ChatArea";
 export type {
@@ -70,7 +70,7 @@ export type {
   ChatAppProps,
   UserData as ChatAppUserData,
   ConversationData as ChatAppConversationData,
-  MessageData as ChatAppMessageData,
+  // MessageData as ChatAppMessageData,
 } from "./ChatApp";
 
 // Utilities

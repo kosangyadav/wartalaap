@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import Card, { CardBody } from "../Card";
+import Card from "../Card";
 import { cn } from "../../utils/cn";
 
 export interface AuthLayoutProps {
-  onLogin: (data: { email: string; password: string }) => Promise<void>;
-  onSignUp: (data: {
+  onLogin?: (data: { email: string; password: string }) => Promise<void>;
+  onSignUp?: (data: {
     username: string;
     email: string;
     password: string;
@@ -16,15 +16,10 @@ export interface AuthLayoutProps {
   className?: string;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({
-  onLogin,
-  onSignUp,
-  loading = false,
-  error,
-  className,
-}) => {
+const AuthLayout: React.FC<AuthLayoutProps> = () => {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const loading = false;
 
   const handleModeSwitch = (newMode: "login" | "signup") => {
     if (newMode === authMode || loading) return;
@@ -41,7 +36,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       className={cn(
         "min-h-screen bg-cream-100 flex flex-col items-center justify-center p-4",
         "bg-gradient-to-br from-cream-100 via-cream-200 to-cream-300",
-        className,
       )}
     >
       {/* Background Pattern */}
@@ -124,23 +118,23 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           isTransitioning && "opacity-50",
         )}
       >
-        {authMode === "login" ? (
-          <LoginForm
-            onSubmit={onLogin}
-            onSignUp={() => handleModeSwitch("signup")}
-            loading={loading}
-            error={error}
-            className="animate-fade-in"
-          />
-        ) : (
-          <SignUpForm
-            onSubmit={onSignUp}
-            onSignIn={() => handleModeSwitch("login")}
-            loading={loading}
-            error={error}
-            className="animate-fade-in"
-          />
-        )}
+        {/* {authMode === "login" ? ( */}
+        {/*   <LoginForm */}
+        {/*     onSubmit={onLogin} */}
+        {/*     onSignUp={() => handleModeSwitch("signup")} */}
+        {/*     loading={loading} */}
+        {/*     error={error} */}
+        {/*     className="animate-fade-in" */}
+        {/*   /> */}
+        {/* ) : ( */}
+        {/*   <SignUpForm */}
+        {/*     onSubmit={onSignUp} */}
+        {/*     onSignIn={() => handleModeSwitch("login")} */}
+        {/*     loading={loading} */}
+        {/*     error={error} */}
+        {/*     className="animate-fade-in" */}
+        {/*   /> */}
+        {/* )} */}
       </div>
 
       {/* Footer */}
@@ -201,21 +195,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       )}
 
       {/* Responsive adjustments */}
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .text-4xl {
-            font-size: 2.5rem;
-          }
-        }
-
-        @media (max-height: 700px) {
-          .min-h-screen {
-            min-height: auto;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };

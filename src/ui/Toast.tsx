@@ -2,22 +2,22 @@ import React, { useEffect, useState } from "react";
 import { cn } from "../utils/cn";
 
 export interface ToastProps {
-  id: string;
-  type: "success" | "error" | "warning" | "info";
+  id?: string;
+  type?: "success" | "error" | "warning" | "info";
   title?: string;
-  message: string;
+  message?: string;
   duration?: number;
-  onClose: (id: string) => void;
+  onClose?: (id: string) => void;
   showCloseButton?: boolean;
 }
 
 const Toast: React.FC<ToastProps> = ({
-  id,
+  // id,
   type,
   title,
   message,
   duration = 5000,
-  onClose,
+  // onClose,
   showCloseButton = true,
 }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -119,7 +119,7 @@ const Toast: React.FC<ToastProps> = ({
   return (
     <div
       className={cn(
-        typeClasses[type],
+        type ? typeClasses[type] : "",
         "relative overflow-hidden",
         isVisible
           ? "animate-slide-in-right"
@@ -127,7 +127,7 @@ const Toast: React.FC<ToastProps> = ({
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0">{icons[type]}</div>
+        <div className="flex-shrink-0">{type ? icons[type] : ""}</div>
 
         <div className="flex-1 min-w-0">
           {title && (

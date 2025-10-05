@@ -16,7 +16,6 @@ import type {
 import type * as auth from "../auth.js";
 import type * as conversation from "../conversation.js";
 import type * as createChat from "../createChat.js";
-import type * as tasks from "../tasks.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -30,7 +29,6 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   conversation: typeof conversation;
   createChat: typeof createChat;
-  tasks: typeof tasks;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

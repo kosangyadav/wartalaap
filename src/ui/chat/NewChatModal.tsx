@@ -8,6 +8,7 @@ import Card, { CardHeader, CardBody, CardFooter } from "../Card";
 import { useUIStore } from "../../../stores/uiStore";
 
 import { cn } from "../../utils/cn";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 export interface NewChatModalProps {
   isOpen: boolean;
@@ -77,12 +78,13 @@ const NewChatModal: React.FC<NewChatModalProps> = ({
         });
       } else {
         if (!groupName.trim()) return;
-        const memberIds = selectedUsers.map((u) => u._id as string);
-        memberIds.push(user?.id as string);
+        const memberIds: Id<"users">[] = selectedUsers.map(
+          (u) => u._id as Id<"users">,
+        );
+        memberIds.push(user?.id as Id<"users">);
 
         conversationId = await createGroupConversation({
           name: groupName,
-          // @ts-expect-error - Type conversion needed for Convex ID types
           memberIds,
         });
       }

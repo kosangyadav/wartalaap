@@ -337,9 +337,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                         </div>
                       </div>
 
-                      {dateMessages.map((message, index) => {
+                      {dateMessages?.map((message, index) => {
                         const isOwnMessage = message.senderId === user?.id;
-                        const prevMessage = dateMessages[index - 1];
+                        const prevMessage = dateMessages?.[index - 1];
                         const isNewSender =
                           prevMessage?.senderId !== message.senderId;
 

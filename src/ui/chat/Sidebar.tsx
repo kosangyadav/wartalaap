@@ -250,7 +250,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
 
   const isLoading = userConversations === undefined;
-  // @ts-expect-error - API function exists but may not be in generated types
   const getUsernameById = useAction(api.conversation.getUsernameById);
 
   useEffect(() => {

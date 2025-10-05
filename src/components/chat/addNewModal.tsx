@@ -2,6 +2,7 @@ import { useAction, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../../stores/authStore";
+import type { Id } from "../../../convex/_generated/dataModel";
 // import {
 //   create1on1Conversation,
 //   createGroupConversation,
@@ -9,17 +10,23 @@ import { useAuthStore } from "../../../stores/authStore";
 
 const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
   const [searchName, setSearchName] = useState("");
-  const [unselectedUsersList, setUnselectedUsersList] = useState([]);
-  const [selectedUsersList, setSelectedUsersList] = useState([]);
-  const [filterList, setFilterList] = useState([]);
+  const [unselectedUsersList, setUnselectedUsersList] = useState(
+    Array<{ _id?: string; username: string }>,
+  );
+  const [selectedUsersList, setSelectedUsersList] = useState(
+    Array<{ _id?: string; username: string }>,
+  );
+  const [filterList, setFilterList] = useState(
+    Array<{ _id?: string; username: string }>,
+  );
   const [groupName, setGroupName] = useState("");
 
   const { user } = useAuthStore();
 
-  const listUsersAction = useAction(api.createChat.getUsersByUsername);
+  const listUsersAction = useAction(api.createChat?.getUsersByUsername);
 
   const create1on1Conversation = useMutation(
-    api.createChat.create1on1Conversation,
+    api.createChat?.create1on1Conversation,
   );
   const createGroupConversation = useMutation(
     api.createChat.createGroupConversation,
@@ -43,7 +50,7 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
     if (selectedUsersList.length === 1)
       conversationId = await create1on1Conversation({
         userId1: user?.id,
-        userId2: selectedUsersList[0]?._id,
+        userId2: selectedUsersList?.[0]?.["_id"],
       });
     else {
       if (!groupName) {
@@ -51,8 +58,10 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
         return;
       }
       console.log("group chat creating...");
-      const memberIds = selectedUsersList.map((user) => user?._id);
-      memberIds.push(user?.id);
+      const memberIds: Id<"users">[] = selectedUsersList.map(
+        (user) => user?.["_id"] as Id<"users">,
+      );
+      memberIds.push(user?.id as Id<"users">);
 
       conversationId = await createGroupConversation({
         name: groupName,
@@ -62,7 +71,7 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
     console.log(conversationId);
     setSelectedChat({
       conversationId,
-      conversationName: groupName ? groupName : selectedUsersList[0]?._id,
+      conversationName: groupName ? groupName : selectedUsersList[0]?.["_id"],
     });
     toggleCreateChatModal();
   };
@@ -70,7 +79,7 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
   useEffect(() => {
     setFilterList(
       unselectedUsersList.filter((user) =>
-        user?.username?.includes(searchName),
+        (user?.["username"] as string)?.includes(searchName),
       ),
     );
 
@@ -111,27 +120,35 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
                 <h3>Unselescted Users</h3>
                 {filterList.map((user) => (
                   <div
-                    key={user?._id}
-                    data-key={user?._id}
+                    key={user?.["_id"]}
+                    data-key={user?.["_id"]}
                     className="flex justify-between py-2 px-4 border-2 rounded-2xl"
                   >
-                    <h3>{user?.username}</h3>
+                    <h3>{user?.["username"]}</h3>
 
                     <button
                       onClick={(e) => {
                         console.log(e);
-                        setSelectedUsersList((state) => [
-                          ...state,
-                          {
-                            _id: e.target.parentElement.dataset.key,
-                            username: e.target.previousElementSibling.innerText,
-                          },
-                        ]);
+                        setSelectedUsersList(
+                          (state: { _id?: string; username: string }[]) => [
+                            ...state,
+                            {
+                              _id: (e.target as HTMLElement)?.parentElement
+                                ?.dataset.key,
+                              username: (
+                                (e.target as HTMLElement)
+                                  ?.previousElementSibling as HTMLElement
+                              )?.innerText,
+                            },
+                          ],
+                        );
 
                         setUnselectedUsersList((state) =>
                           state.filter(
                             (user) =>
-                              user?._id !== e.target.parentElement.dataset.key,
+                              user?.["_id"] !==
+                              (e.target as HTMLElement)?.parentElement?.dataset
+                                .key,
                           ),
                         );
                       }}
@@ -153,26 +170,32 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
                 <h3>Selescted Users</h3>
                 {selectedUsersList.map((user) => (
                   <div
-                    key={user?._id}
-                    data-key={user?._id}
+                    key={user?.["_id"]}
+                    data-key={user?.["_id"]}
                     className="flex justify-between py-2 px-4 border-2 rounded-2xl"
                   >
-                    <h3>{user?.username}</h3>
+                    <h3>{user?.["username"]}</h3>
 
                     <button
                       onClick={(e) => {
                         setUnselectedUsersList((state) => [
                           ...state,
                           {
-                            _id: e.target.parentElement.dataset.key,
-                            username: e.target.previousElementSibling.innerText,
+                            _id: (e.target as HTMLElement)?.parentElement
+                              ?.dataset.key,
+                            username: (
+                              (e.target as HTMLElement)
+                                ?.previousElementSibling as HTMLElement
+                            )?.innerText,
                           },
                         ]);
 
                         setSelectedUsersList((state) =>
                           state.filter(
                             (user) =>
-                              user?._id !== e.target.parentElement.dataset.key,
+                              user?.["_id"] !==
+                              (e.target as HTMLElement)?.parentElement?.dataset
+                                .key,
                           ),
                         );
                       }}
@@ -192,7 +215,7 @@ const AddNewModal = ({ className, toggleCreateChatModal, setSelectedChat }) => {
             ) : selectedUsersList.length === 1 ? (
               <h2>
                 Action : creating a 1 on 1 chat with{" "}
-                {selectedUsersList[0].username}...
+                {selectedUsersList[0]?.["username"]}...
               </h2>
             ) : (
               <div>

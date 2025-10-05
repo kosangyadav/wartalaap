@@ -15,7 +15,7 @@ export interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit,
-  onForgotPassword,
+  // onForgotPassword,
   onSignUp,
   loading = false,
   error,

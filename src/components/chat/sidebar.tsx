@@ -22,7 +22,7 @@ const Sidebar = ({ toggleCreateChatModal, setSelectedChat }) => {
   const getUsernameById = useAction(api.conversation?.getUsernameById);
 
   const [userConversationsNames, setUserConversationsNames] = useState<
-    [{ id: string; name: string }] | []
+    Array<{ id: string; name: string }>
   >([]);
 
   useEffect(() => {
@@ -33,19 +33,23 @@ const Sidebar = ({ toggleCreateChatModal, setSelectedChat }) => {
           if (conversation?.isGroup)
             return {
               id: conversation._id,
-              name: conversation?.name,
+              name: conversation?.name as string,
             };
           else {
             const twoUsers = conversation?.pairKey?.split(":");
             if (twoUsers?.[0] === user?.id)
               return {
                 id: conversation?._id,
-                name: await getUsernameById({ userId: twoUsers?.[1] }),
+                name: (await getUsernameById({
+                  userId: twoUsers?.[1],
+                })) as string,
               };
             else
               return {
                 id: conversation?._id,
-                name: await getUsernameById({ userId: twoUsers?.[0] }),
+                name: (await getUsernameById({
+                  userId: twoUsers?.[0],
+                })) as string,
               };
           }
         }),
@@ -73,8 +77,9 @@ const Sidebar = ({ toggleCreateChatModal, setSelectedChat }) => {
                 <button
                   onClick={(e) =>
                     setSelectedChat({
-                      conversationId: e.target?.parentElement?.dataset.key,
-                      conversationName: e.target?.innerText,
+                      conversationId: (e.target as HTMLElement)?.parentElement
+                        ?.dataset.key,
+                      conversationName: (e.target as HTMLElement)?.innerText,
                     })
                   }
                 >

@@ -29,7 +29,7 @@ export const checkUser = action({
     email?: string;
   }> => {
     // console.log(username);
-    const user = await ctx.runQuery(internal.auth.getUser, { username });
+    const user = await ctx.runQuery(internal?.["auth"].getUser, { username });
     // console.log(user);
     if (action === "signup") {
       return {
